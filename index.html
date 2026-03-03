@@ -54,9 +54,17 @@
     </section>
 
     <section class="card" id="generator-card">
-      <h2>로또번호 생성기 (고급 옵션)</h2>
-      <p class="section-desc">직전회차 제외, 특정번호 포함/제외, 홀짝/합계/연속수 조건을 함께 적용해 조합을 생성합니다.</p>
-      <div class="option-grid">
+      <h2>로또번호 생성기</h2>
+      <p class="section-desc">원하는 방식을 선택하면 숫자(1~45)를 눌러 쉽게 설정할 수 있습니다.</p>
+      <div class="controls row-wrap">
+        <label>생성 방식
+          <select id="generator-mode">
+            <option value="random">완전 랜덤</option>
+            <option value="include">선택 번호 포함</option>
+            <option value="exclude">선택 번호 제외</option>
+            <option value="exclude-last">직전회차 번호 제외</option>
+          </select>
+        </label>
         <label>생성 세트 수
           <select id="set-count">
             <option value="1">1세트</option>
@@ -65,77 +73,21 @@
             <option value="10">10세트</option>
           </select>
         </label>
-        <div class="picker-panel">
-          <div class="picker-head">
-            <span>포함할 번호 선택 (최대 6개)</span>
-            <button id="clear-include-btn" type="button">초기화</button>
-          </div>
-          <div id="include-picker" class="number-picker"></div>
-          <p id="include-summary" class="picker-summary">선택 없음</p>
-        </div>
-        <div class="picker-panel">
-          <div class="picker-head">
-            <span>제외할 번호 선택</span>
-            <button id="clear-exclude-btn" type="button">초기화</button>
-          </div>
-          <div id="exclude-picker" class="number-picker"></div>
-          <p id="exclude-summary" class="picker-summary">선택 없음</p>
-        </div>
-        <label class="inline-check">
-          <input id="exclude-last-draw" type="checkbox" />
-          직전회차 번호 제외 사용
-        </label>
-        <div class="picker-panel">
-          <div class="picker-head">
-            <span>직전회차 번호 선택 (정확히 6개)</span>
-            <button id="clear-last-draw-btn" type="button">초기화</button>
-          </div>
-          <div id="last-draw-picker" class="number-picker"></div>
-          <p id="last-draw-summary" class="picker-summary">선택 없음</p>
-        </div>
-        <label>합계 최소/최대 (예: 100,180)
-          <input id="sum-range" type="text" value="100,180" />
-        </label>
-        <label>홀수 개수 최소/최대 (예: 2,4)
-          <input id="odd-range" type="text" value="2,4" />
-        </label>
-        <label>저번호(1~22) 개수 최소/최대 (예: 2,4)
-          <input id="low-range" type="text" value="2,4" />
-        </label>
-        <label>최대 연속번호 허용 개수
-          <select id="max-consecutive">
-            <option value="1">1개 (연속수 없음)</option>
-            <option value="2" selected>2개</option>
-            <option value="3">3개</option>
-            <option value="4">4개</option>
-            <option value="5">5개</option>
-            <option value="6">6개</option>
-          </select>
-        </label>
-        <label>동일 끝수 최대 허용 개수
-          <select id="max-same-ending">
-            <option value="1">1개</option>
-            <option value="2" selected>2개</option>
-            <option value="3">3개</option>
-            <option value="4">4개</option>
-            <option value="5">5개</option>
-            <option value="6">6개</option>
-          </select>
-        </label>
       </div>
-      <div class="preset-row">
-        <span>빠른 프리셋</span>
-        <button type="button" class="preset-btn" data-preset="balanced">균형형</button>
-        <button type="button" class="preset-btn" data-preset="exclude-last">직전회차 자동제외</button>
-        <button type="button" class="preset-btn" data-preset="high-focus">고번호 강화</button>
-        <button type="button" class="preset-btn" data-preset="low-focus">저번호 강화</button>
-        <button type="button" class="preset-btn" data-preset="relaxed">완화형</button>
+      <p id="mode-help" class="updated-note">완전 랜덤은 번호 선택 없이 생성합니다.</p>
+      <div id="mode-picker-wrap" class="picker-panel">
+        <div class="picker-head">
+          <span id="mode-picker-title">번호 선택</span>
+          <button id="clear-mode-picked-btn" type="button">선택 초기화</button>
+        </div>
+        <div id="mode-picker" class="number-picker"></div>
+        <p id="mode-picked-summary" class="picker-summary">선택 없음</p>
       </div>
       <div class="controls">
-        <button id="generate-btn">조건 적용 생성</button>
-        <button id="reset-options-btn" type="button">옵션 초기화</button>
+        <button id="generate-btn">번호 생성</button>
+        <button id="reset-options-btn" type="button">초기화</button>
       </div>
-      <p id="generator-message" class="updated-note">옵션을 설정한 뒤 번호를 생성하세요.</p>
+      <p id="generator-message" class="updated-note">방식을 선택하고 번호를 생성하세요.</p>
       <ul id="generated-list" class="number-list"></ul>
     </section>
 
