@@ -11,9 +11,8 @@ const storeInput = document.querySelector("#store-draw-no");
 const storeSearchBtn = document.querySelector("#store-search-btn");
 const storeResult = document.querySelector("#store-result");
 
-const FIRST_DRAW_DATE = new Date("2002-12-07T20:45:00+09:00");
-const OFFICIAL_DRAW_ENDPOINT = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber";
-const OFFICIAL_STORE_ENDPOINT = "https://www.dhlottery.co.kr/store.do?method=topStore&pageGubun=L645";
+const API_DRAW = "/api/draw";
+const API_STORES = "/api/stores";
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -32,7 +31,7 @@ function ballColor(number) {
   if (number <= 10) return "#f4b400";
   if (number <= 20) return "#2d9cdb";
   if (number <= 30) return "#eb5757";
-  if (number <= 40) return "#888f9b";
+  if (number <= 40) return "#646c7a";
   return "#27ae60";
 }
 
@@ -56,65 +55,21 @@ function renderGeneratedSets() {
     label.textContent = `${i + 1}세트`;
     li.appendChild(label);
 
-    createLottoSet().forEach((num) => {
-      li.appendChild(createBall(num));
-    });
-
+    createLottoSet().forEach((num) => li.appendChild(createBall(num)));
     generatedList.appendChild(li);
   }
 }
 
-function estimatedLatestDrawNo() {
-  const now = new Date();
-  const elapsed = now.getTime() - FIRST_DRAW_DATE.getTime();
-  const weeks = Math.floor(elapsed / (7 * 24 * 60 * 60 * 1000));
-  return Math.max(1, weeks + 1);
-}
-
-async function fetchJsonWithFallback(url) {
-  try {
-    const directResponse = await fetch(url, { cache: "no-store" });
-    if (!directResponse.ok) {
-      throw new Error(`HTTP ${directResponse.status}`);
-    }
-    return await directResponse.json();
-  } catch (directError) {
-    const wrapped = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const wrappedResponse = await fetch(wrapped, { cache: "no-store" });
-    if (!wrappedResponse.ok) {
-      throw new Error(`프록시 호출 실패: HTTP ${wrappedResponse.status}`);
-    }
-    return await wrappedResponse.json();
+async function requestJson(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  const body = await res.json();
+  if (!res.ok || !body.ok) {
+    throw new Error(body.error || `요청 실패: HTTP ${res.status}`);
   }
-}
-
-async function fetchTextWithFallback(url) {
-  try {
-    const directResponse = await fetch(url, { cache: "no-store" });
-    if (!directResponse.ok) {
-      throw new Error(`HTTP ${directResponse.status}`);
-    }
-    return await directResponse.text();
-  } catch (directError) {
-    const wrapped = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const wrappedResponse = await fetch(wrapped, { cache: "no-store" });
-    if (!wrappedResponse.ok) {
-      throw new Error(`프록시 호출 실패: HTTP ${wrappedResponse.status}`);
-    }
-    return await wrappedResponse.text();
-  }
-}
-
-async function fetchDraw(drawNo) {
-  return fetchJsonWithFallback(`${OFFICIAL_DRAW_ENDPOINT}&drwNo=${drawNo}`);
+  return body;
 }
 
 function renderDrawResult(data) {
-  if (data.returnValue !== "success") {
-    drawResult.textContent = "해당 회차 정보를 찾을 수 없습니다.";
-    return;
-  }
-
   const numbers = [
     data.drwtNo1,
     data.drwtNo2,
@@ -126,8 +81,8 @@ function renderDrawResult(data) {
 
   drawResult.innerHTML = "";
 
-  const top = document.createElement("div");
-  top.innerHTML = `<strong>${data.drwNo}회</strong> (${data.drwNoDate})`;
+  const title = document.createElement("div");
+  title.innerHTML = `<strong>${data.drwNo}회</strong> (${data.drwNoDate})`;
 
   const ballsWrap = document.createElement("div");
   ballsWrap.className = "number-set";
@@ -135,59 +90,21 @@ function renderDrawResult(data) {
 
   const bonusLabel = document.createElement("span");
   bonusLabel.textContent = "보너스";
-  bonusLabel.style.marginLeft = "4px";
+  bonusLabel.className = "bonus-label";
+
   ballsWrap.appendChild(bonusLabel);
   ballsWrap.appendChild(createBall(data.bnusNo));
 
-  const firstPrize = document.createElement("p");
-  firstPrize.style.margin = "10px 0 0";
-  firstPrize.textContent = `1등 총 ${Number(data.firstPrzwnerCo).toLocaleString()}명, 1인당 ${Number(data.firstWinamnt).toLocaleString()}원`;
+  const prize = document.createElement("p");
+  prize.className = "result-meta";
+  prize.textContent = `1등 ${Number(data.firstPrzwnerCo).toLocaleString()}명 · 1인당 ${Number(data.firstWinamnt).toLocaleString()}원`;
 
-  drawResult.append(top, ballsWrap, firstPrize);
-}
-
-async function findLatestDraw() {
-  let current = estimatedLatestDrawNo();
-  for (let i = 0; i < 4; i += 1) {
-    const data = await fetchDraw(current - i);
-    if (data.returnValue === "success") {
-      return data;
-    }
-  }
-  throw new Error("최신 회차를 찾을 수 없습니다.");
-}
-
-function parseStoreRowsFromHtml(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-
-  const rows = Array.from(doc.querySelectorAll("tbody tr"));
-  const stores = [];
-
-  rows.forEach((row) => {
-    const cells = Array.from(row.querySelectorAll("td")).map((td) =>
-      td.textContent ? td.textContent.trim() : ""
-    );
-
-    if (cells.length >= 3) {
-      const joined = cells.join(" ");
-      if (joined.includes("자동") || joined.includes("수동") || joined.includes("반자동")) {
-        stores.push({
-          rank: cells[0] || "-",
-          name: cells[1] || "-",
-          method: cells[2] || "-",
-          address: cells.slice(3).join(" ") || "-",
-        });
-      }
-    }
-  });
-
-  return stores;
+  drawResult.append(title, ballsWrap, prize);
 }
 
 function renderStoreResult(drawNo, stores) {
   if (!stores.length) {
-    storeResult.textContent = `${drawNo}회 1등 판매점 정보를 찾지 못했습니다.`;
+    storeResult.textContent = `${drawNo}회 판매점 정보를 찾지 못했습니다.`;
     return;
   }
 
@@ -206,27 +123,27 @@ function renderStoreResult(drawNo, stores) {
 
 async function handleCheckDraw() {
   const drawNo = Number(drawInput.value);
-  if (!drawNo || drawNo < 1) {
+  if (!Number.isInteger(drawNo) || drawNo < 1) {
     drawResult.textContent = "1 이상의 회차 번호를 입력하세요.";
     return;
   }
 
   drawResult.textContent = "조회 중...";
   try {
-    const data = await fetchDraw(drawNo);
-    renderDrawResult(data);
+    const body = await requestJson(`${API_DRAW}?drawNo=${drawNo}`);
+    renderDrawResult(body.data);
   } catch (error) {
     drawResult.textContent = `조회 실패: ${error.message}`;
   }
 }
 
 async function handleLoadLatest() {
-  drawResult.textContent = "최신 회차 확인 중...";
+  drawResult.textContent = "최신 회차 조회 중...";
   try {
-    const latest = await findLatestDraw();
-    drawInput.value = latest.drwNo;
-    storeInput.value = latest.drwNo;
-    renderDrawResult(latest);
+    const body = await requestJson(`${API_DRAW}?drawNo=latest`);
+    drawInput.value = body.data.drwNo;
+    storeInput.value = body.data.drwNo;
+    renderDrawResult(body.data);
   } catch (error) {
     drawResult.textContent = `최신 회차 조회 실패: ${error.message}`;
   }
@@ -234,21 +151,29 @@ async function handleLoadLatest() {
 
 async function handleStoreSearch() {
   const drawNo = Number(storeInput.value);
-  if (!drawNo || drawNo < 1) {
+  if (!Number.isInteger(drawNo) || drawNo < 1) {
     storeResult.textContent = "1 이상의 회차 번호를 입력하세요.";
     return;
   }
 
   storeResult.textContent = "판매점 조회 중...";
-
   try {
-    const url = `${OFFICIAL_STORE_ENDPOINT}&drwNo=${drawNo}`;
-    const html = await fetchTextWithFallback(url);
-    const stores = parseStoreRowsFromHtml(html);
-    renderStoreResult(drawNo, stores);
+    const body = await requestJson(`${API_STORES}?drawNo=${drawNo}`);
+    renderStoreResult(drawNo, body.stores || []);
   } catch (error) {
     storeResult.textContent = `조회 실패: ${error.message}`;
   }
+}
+
+function initAdsense() {
+  const adSlots = document.querySelectorAll(".adsbygoogle");
+  adSlots.forEach(() => {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (error) {
+      // 광고 스크립트 미설치/심사 전 상태에서는 조용히 무시
+    }
+  });
 }
 
 generateBtn.addEventListener("click", renderGeneratedSets);
@@ -258,3 +183,4 @@ storeSearchBtn.addEventListener("click", handleStoreSearch);
 
 renderGeneratedSets();
 handleLoadLatest();
+initAdsense();
