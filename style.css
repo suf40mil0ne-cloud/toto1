@@ -280,6 +280,11 @@ a {
   color: #334155;
 }
 
+.mini-actions {
+  display: flex;
+  gap: 6px;
+}
+
 .picker-head button {
   padding: 6px 10px;
   font-size: 0.78rem;

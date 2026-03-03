@@ -6,6 +6,7 @@ const modePickerWrap = document.querySelector("#mode-picker-wrap");
 const modePickerTitle = document.querySelector("#mode-picker-title");
 const modePickedSummary = document.querySelector("#mode-picked-summary");
 const clearModePickedBtn = document.querySelector("#clear-mode-picked-btn");
+const autoLastDrawBtn = document.querySelector("#auto-last-draw-btn");
 const generateBtn = document.querySelector("#generate-btn");
 const resetOptionsBtn = document.querySelector("#reset-options-btn");
 const generatorMessage = document.querySelector("#generator-message");
@@ -24,6 +25,7 @@ const API_DRAW = "/api/draw";
 const API_STORES = "/api/stores";
 
 const pickedNumbers = new Set();
+let cachedLatestDrawNumbers = [];
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -91,10 +93,12 @@ function updateModeUI() {
     modeHelp.textContent = "완전 랜덤은 번호 선택 없이 생성합니다.";
     modePickerTitle.textContent = "번호 선택 (사용 안 함)";
     modePickerWrap.style.display = "none";
+    autoLastDrawBtn.style.display = "none";
     return;
   }
 
   modePickerWrap.style.display = "block";
+  autoLastDrawBtn.style.display = "none";
 
   if (mode === "include") {
     modeHelp.textContent = "선택한 번호를 반드시 포함해 생성합니다. (최대 6개 선택)";
@@ -108,8 +112,9 @@ function updateModeUI() {
     return;
   }
 
-  modeHelp.textContent = "직전회차 6개 번호를 선택하면 해당 번호를 제외하고 생성합니다.";
+  modeHelp.textContent = "직전회차 번호를 자동으로 불러와 제외합니다. 필요하면 직접 수정도 가능합니다.";
   modePickerTitle.textContent = "직전회차 번호 선택 (정확히 6개)";
+  autoLastDrawBtn.style.display = "inline-flex";
 }
 
 function handleModePickerClick(event) {
@@ -197,6 +202,38 @@ function renderGeneratedSets() {
   }
 }
 
+function applyLastDrawNumbers(numbers) {
+  pickedNumbers.clear();
+  numbers.forEach((n) => pickedNumbers.add(n));
+  paintModePicker();
+  syncModePickedSummary();
+}
+
+async function autoLoadLastDrawNumbers() {
+  try {
+    generatorMessage.textContent = "직전회차 번호 불러오는 중...";
+    const body = await requestJson(`${API_DRAW}?drawNo=latest`);
+    const numbers = [
+      body.data.drwtNo1,
+      body.data.drwtNo2,
+      body.data.drwtNo3,
+      body.data.drwtNo4,
+      body.data.drwtNo5,
+      body.data.drwtNo6,
+    ];
+    cachedLatestDrawNumbers = [...numbers];
+    applyLastDrawNumbers(numbers);
+    generatorMessage.textContent = `직전회차 ${body.data.drwNo}회 번호 자동 적용 완료`;
+  } catch (error) {
+    if (cachedLatestDrawNumbers.length === 6) {
+      applyLastDrawNumbers(cachedLatestDrawNumbers);
+      generatorMessage.textContent = "서버 조회 실패로 마지막 저장 번호를 사용했습니다.";
+      return;
+    }
+    generatorMessage.textContent = `자동 불러오기 실패: ${error.message}`;
+  }
+}
+
 function resetGeneratorOptions() {
   modeSelect.value = "random";
   setCountSelect.value = "3";
@@ -228,6 +265,7 @@ function renderDrawResult(data) {
     data.drwtNo5,
     data.drwtNo6,
   ];
+  cachedLatestDrawNumbers = [...numbers];
 
   drawResult.innerHTML = "";
 
@@ -335,12 +373,18 @@ function initAdsense() {
 }
 
 modeSelect.addEventListener("change", updateModeUI);
+modeSelect.addEventListener("change", () => {
+  if (modeSelect.value === "exclude-last" && pickedNumbers.size === 0) {
+    autoLoadLastDrawNumbers();
+  }
+});
 modePicker.addEventListener("click", handleModePickerClick);
 clearModePickedBtn.addEventListener("click", () => {
   pickedNumbers.clear();
   paintModePicker();
   syncModePickedSummary();
 });
+autoLastDrawBtn.addEventListener("click", autoLoadLastDrawNumbers);
 
 generateBtn.addEventListener("click", renderGeneratedSets);
 resetOptionsBtn.addEventListener("click", resetGeneratorOptions);
