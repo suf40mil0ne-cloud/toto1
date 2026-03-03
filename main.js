@@ -3,6 +3,7 @@ const setCountSelect = document.querySelector("#set-count");
 const generateBtn = document.querySelector("#generate-btn");
 const resetOptionsBtn = document.querySelector("#reset-options-btn");
 const generatorMessage = document.querySelector("#generator-message");
+const presetButtons = document.querySelectorAll(".preset-btn");
 
 const includePicker = document.querySelector("#include-picker");
 const excludePicker = document.querySelector("#exclude-picker");
@@ -31,6 +32,7 @@ const storeResult = document.querySelector("#store-result");
 
 const API_DRAW = "/api/draw";
 const API_STORES = "/api/stores";
+let latestDrawNumbers = [];
 const picked = {
   include: new Set(),
   exclude: new Set(),
@@ -210,6 +212,75 @@ function initPickers() {
   syncPickerSummary();
 }
 
+function setPickedNumbers(type, numbers) {
+  picked[type].clear();
+  numbers.forEach((n) => picked[type].add(n));
+}
+
+function applyPreset(key) {
+  const base = {
+    sum: "100,180",
+    odd: "2,4",
+    low: "2,4",
+    maxConsecutive: "2",
+    maxSameEnding: "2",
+    excludeLast: false,
+  };
+
+  if (key === "high-focus") {
+    base.sum = "125,205";
+    base.odd = "2,5";
+    base.low = "1,3";
+    base.maxConsecutive = "3";
+  }
+
+  if (key === "low-focus") {
+    base.sum = "85,165";
+    base.odd = "2,5";
+    base.low = "3,5";
+    base.maxConsecutive = "2";
+  }
+
+  if (key === "relaxed") {
+    base.sum = "90,200";
+    base.odd = "1,5";
+    base.low = "1,5";
+    base.maxConsecutive = "4";
+    base.maxSameEnding = "3";
+  }
+
+  if (key === "exclude-last") {
+    base.excludeLast = true;
+  }
+
+  sumRangeInput.value = base.sum;
+  oddRangeInput.value = base.odd;
+  lowRangeInput.value = base.low;
+  maxConsecutiveSelect.value = base.maxConsecutive;
+  maxSameEndingSelect.value = base.maxSameEnding;
+
+  if (key !== "exclude-last") {
+    excludeLastDrawInput.checked = false;
+    setPickedNumbers("lastDraw", []);
+  } else {
+    excludeLastDrawInput.checked = true;
+    if (latestDrawNumbers.length === 6) {
+      setPickedNumbers("lastDraw", latestDrawNumbers);
+    } else if (picked.lastDraw.size !== 6) {
+      generatorMessage.textContent = "직전회차 자동제외를 쓰려면 먼저 당첨번호 조회에서 회차를 불러오거나 직전회차 번호 6개를 선택하세요.";
+      paintPickerButtons();
+      syncPickerSummary();
+      return;
+    }
+  }
+
+  setPickedNumbers("include", []);
+  setPickedNumbers("exclude", []);
+  paintPickerButtons();
+  syncPickerSummary();
+  generatorMessage.textContent = `프리셋 적용 완료: ${key}`;
+}
+
 function parseGeneratorOptions() {
   const includeNumbers = toSortedArray(picked.include);
   const excludeNumbers = toSortedArray(picked.exclude);
@@ -383,6 +454,7 @@ function renderDrawResult(data) {
     data.drwtNo5,
     data.drwtNo6,
   ];
+  latestDrawNumbers = [...numbers];
 
   drawResult.innerHTML = "";
 
@@ -491,6 +563,9 @@ function initAdsense() {
 
 generateBtn.addEventListener("click", renderGeneratedSets);
 resetOptionsBtn.addEventListener("click", resetGeneratorOptions);
+presetButtons.forEach((btn) => {
+  btn.addEventListener("click", () => applyPreset(btn.dataset.preset));
+});
 checkDrawBtn.addEventListener("click", handleCheckDraw);
 loadLatestBtn.addEventListener("click", handleLoadLatest);
 storeSearchBtn.addEventListener("click", handleStoreSearch);

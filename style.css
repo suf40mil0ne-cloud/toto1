@@ -228,6 +228,34 @@ a {
   margin-bottom: 12px;
 }
 
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.preset-row > span {
+  font-size: 0.86rem;
+  color: #334155;
+  margin-right: 4px;
+}
+
+.preset-btn {
+  border: 1px solid #bfd2e8;
+  background: #eef5ff;
+  color: #1e3a5f;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 12px;
+}
+
+.preset-btn:hover {
+  background: #e2efff;
+}
+
 .option-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -491,5 +519,9 @@ button:hover {
   select,
   input {
     width: 100%;
+  }
+
+  .preset-row .preset-btn {
+    width: auto;
   }
 }
