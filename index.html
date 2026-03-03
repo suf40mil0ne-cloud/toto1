@@ -1,14 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+  <title>로또 도우미</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=SUIT:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="/style.css" rel="stylesheet" />
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+  <div class="bg-shape one"></div>
+  <div class="bg-shape two"></div>
+
+  <main class="container">
+    <header class="hero">
+      <p class="kicker">LOTTO TOOLKIT</p>
+      <h1>로또번호 생성부터<br />당첨/판매점 조회까지</h1>
+      <p class="hero-desc">한 페이지에서 빠르게 확인하는 한국 로또 도우미</p>
+    </header>
+
+    <section class="card" id="generator-card">
+      <h2>로또번호 생성기</h2>
+      <div class="controls">
+        <label for="set-count">생성 세트 수</label>
+        <select id="set-count">
+          <option value="1">1세트</option>
+          <option value="3" selected>3세트</option>
+          <option value="5">5세트</option>
+          <option value="10">10세트</option>
+        </select>
+        <button id="generate-btn">번호 생성</button>
+      </div>
+      <ul id="generated-list" class="number-list"></ul>
+    </section>
+
+    <section class="card" id="draw-card">
+      <h2>지난 회차 당첨 확인</h2>
+      <div class="controls row-wrap">
+        <button id="load-latest-btn">최신 회차 불러오기</button>
+        <label for="draw-no">회차 번호</label>
+        <input type="number" id="draw-no" min="1" placeholder="예: 1150" />
+        <button id="check-draw-btn">회차 조회</button>
+      </div>
+      <div id="draw-result" class="result-box">회차를 선택해 조회하세요.</div>
+    </section>
+
+    <section class="card" id="store-card">
+      <h2>당첨 판매점 조회 (1등)</h2>
+      <div class="controls row-wrap">
+        <label for="store-draw-no">회차 번호</label>
+        <input type="number" id="store-draw-no" min="1" placeholder="예: 1150" />
+        <button id="store-search-btn">판매점 조회</button>
+      </div>
+      <div id="store-result" class="result-box">회차를 입력해 판매점을 조회하세요.</div>
+      <p class="notice">일부 브라우저/환경에서는 외부 사이트 보안정책(CORS)으로 조회가 제한될 수 있습니다.</p>
+    </section>
+  </main>
+
+  <script defer src="/main.js"></script>
 </body>
 </html>
