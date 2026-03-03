@@ -64,7 +64,9 @@ async function requestJson(url) {
   const res = await fetch(url, { cache: "no-store" });
   const body = await res.json();
   if (!res.ok || !body.ok) {
-    throw new Error(body.error || `요청 실패: HTTP ${res.status}`);
+    const error = new Error(body.error || `요청 실패: HTTP ${res.status}`);
+    error.blocked = Boolean(body.blocked);
+    throw error;
   }
   return body;
 }
@@ -133,6 +135,10 @@ async function handleCheckDraw() {
     const body = await requestJson(`${API_DRAW}?drawNo=${drawNo}`);
     renderDrawResult(body.data);
   } catch (error) {
+    if (error.blocked) {
+      drawResult.innerHTML = `조회 실패: ${error.message}<br/><a href="https://www.dhlottery.co.kr/gameResult.do?method=byWin&drwNo=${drawNo}" target="_blank" rel="noopener noreferrer">동행복권 공식 페이지에서 확인</a>`;
+      return;
+    }
     drawResult.textContent = `조회 실패: ${error.message}`;
   }
 }
@@ -161,6 +167,10 @@ async function handleStoreSearch() {
     const body = await requestJson(`${API_STORES}?drawNo=${drawNo}`);
     renderStoreResult(drawNo, body.stores || []);
   } catch (error) {
+    if (error.blocked) {
+      storeResult.innerHTML = `조회 실패: ${error.message}<br/><a href="https://www.dhlottery.co.kr/store.do?method=topStore&pageGubun=L645&drwNo=${drawNo}" target="_blank" rel="noopener noreferrer">동행복권 공식 판매점 페이지 열기</a>`;
+      return;
+    }
     storeResult.textContent = `조회 실패: ${error.message}`;
   }
 }

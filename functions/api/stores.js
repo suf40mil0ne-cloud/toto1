@@ -24,6 +24,10 @@ function stripTags(value) {
 }
 
 function parseStores(html) {
+  if (html.includes("현재 접속 사용자가 많아") || html.includes("errorPage")) {
+    throw new Error("동행복권 서버 대기열로 인해 판매점 조회가 제한되고 있습니다.");
+  }
+
   const stores = [];
   const rows = html.match(/<tr[\s\S]*?<\/tr>/gi) || [];
 
@@ -71,6 +75,14 @@ export async function onRequestGet({ request }) {
 
     const html = await res.text();
     const stores = parseStores(html);
+
+    if (!stores.length) {
+      return json({
+        ok: false,
+        blocked: true,
+        error: "동행복권 응답에서 판매점 데이터를 찾지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      }, 503);
+    }
 
     return json({ ok: true, source: "dhlottery", drawNo, count: stores.length, stores });
   } catch (error) {

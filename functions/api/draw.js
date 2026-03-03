@@ -34,7 +34,19 @@ async function fetchDraw(drawNo) {
     throw new Error(`동행복권 호출 실패: HTTP ${res.status}`);
   }
 
-  return res.json();
+  const text = await res.text();
+  if (text.includes("현재 접속 사용자가 많아") || text.includes("errorPage")) {
+    throw new Error("동행복권 서버 대기열로 인해 조회가 제한되고 있습니다.");
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    throw new Error("동행복권 응답 형식이 변경되어 조회에 실패했습니다.");
+  }
+
+  return parsed;
 }
 
 export async function onRequestGet({ request }) {
@@ -66,6 +78,8 @@ export async function onRequestGet({ request }) {
 
     return json({ ok: true, source: "dhlottery", data });
   } catch (error) {
-    return json({ ok: false, error: error.message || "알 수 없는 서버 오류" }, 500);
+    const message = error.message || "알 수 없는 서버 오류";
+    const blocked = message.includes("대기열");
+    return json({ ok: false, blocked, error: message }, blocked ? 503 : 500);
   }
 }
