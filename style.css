@@ -1,9 +1,9 @@
 :root {
-  --bg: #f6f8fb;
-  --ink: #121621;
+  --bg: #f5f7f4;
+  --ink: #0f1724;
   --card: rgba(255, 255, 255, 0.9);
-  --brand: #0d8a5f;
-  --brand-2: #ff8f1f;
+  --brand: #0d7a56;
+  --brand-2: #ea7c14;
   --line: #e3e8ef;
 }
 
@@ -15,10 +15,10 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font-family: "SUIT", "Apple SD Gothic Neo", sans-serif;
+  font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
   background:
-    radial-gradient(circle at 15% 10%, #d9fce8 0%, transparent 35%),
-    radial-gradient(circle at 85% 85%, #ffe8ce 0%, transparent 38%),
+    radial-gradient(circle at 15% 10%, #d8f6e7 0%, transparent 35%),
+    radial-gradient(circle at 85% 85%, #ffe5c7 0%, transparent 38%),
     var(--bg);
   overflow-x: hidden;
 }
@@ -63,39 +63,45 @@ body {
   display: inline-block;
   margin: 0;
   color: #fff;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  background: linear-gradient(135deg, var(--brand), #37b784);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  background: linear-gradient(135deg, #1e9f72, #0b6f4f);
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 6px 14px;
 }
 
 .hero h1 {
   margin: 14px 0 8px;
-  font-family: "Black Han Sans", sans-serif;
-  font-size: clamp(1.7rem, 4.5vw, 2.8rem);
-  line-height: 1.2;
-  letter-spacing: 0.02em;
+  font-family: "Noto Serif KR", serif;
+  font-size: clamp(1.9rem, 4.8vw, 3rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-weight: 700;
 }
 
 .hero-desc {
   margin: 0;
-  color: #4a5366;
+  color: #3f4b61;
+  font-weight: 500;
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 20px;
   backdrop-filter: blur(4px);
-  box-shadow: 0 12px 30px rgba(28, 35, 54, 0.08);
+  box-shadow: 0 18px 35px rgba(25, 33, 50, 0.08);
   animation: rise 0.5s ease both;
 }
 
 .card h2 {
   margin: 0 0 14px;
-  font-size: 1.2rem;
+  font-family: "Noto Serif KR", serif;
+  font-size: 1.28rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .controls {
@@ -133,9 +139,10 @@ button {
   border: none;
   color: #fff;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--brand), #26a875);
+  background: linear-gradient(135deg, var(--brand), #179e6e);
   cursor: pointer;
   transition: transform 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 8px 18px rgba(13, 122, 86, 0.22);
 }
 
 button:hover {
