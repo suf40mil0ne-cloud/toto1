@@ -235,6 +235,74 @@ a {
   margin-bottom: 12px;
 }
 
+.picker-panel {
+  border: 1px solid #e5edf6;
+  border-radius: 12px;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.picker-head button {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  border-radius: 999px;
+}
+
+.number-picker {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.pick-btn {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 0;
+  background: #fff;
+  color: #1e293b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pick-btn:hover {
+  background: #eef6ff;
+}
+
+.pick-btn.active-include {
+  background: #0f7a57;
+  color: #fff;
+  border-color: #0f7a57;
+}
+
+.pick-btn.active-exclude {
+  background: #9f1239;
+  color: #fff;
+  border-color: #9f1239;
+}
+
+.pick-btn.active-lastdraw {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+
+.picker-summary {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
 .option-grid label {
   display: grid;
   gap: 6px;
@@ -409,6 +477,10 @@ button:hover {
   .info-grid,
   .option-grid {
     grid-template-columns: 1fr;
+  }
+
+  .number-picker {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .controls {

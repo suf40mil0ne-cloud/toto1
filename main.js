@@ -4,10 +4,16 @@ const generateBtn = document.querySelector("#generate-btn");
 const resetOptionsBtn = document.querySelector("#reset-options-btn");
 const generatorMessage = document.querySelector("#generator-message");
 
-const includeInput = document.querySelector("#include-numbers");
-const excludeInput = document.querySelector("#exclude-numbers");
+const includePicker = document.querySelector("#include-picker");
+const excludePicker = document.querySelector("#exclude-picker");
+const lastDrawPicker = document.querySelector("#last-draw-picker");
+const includeSummary = document.querySelector("#include-summary");
+const excludeSummary = document.querySelector("#exclude-summary");
+const lastDrawSummary = document.querySelector("#last-draw-summary");
+const clearIncludeBtn = document.querySelector("#clear-include-btn");
+const clearExcludeBtn = document.querySelector("#clear-exclude-btn");
+const clearLastDrawBtn = document.querySelector("#clear-last-draw-btn");
 const excludeLastDrawInput = document.querySelector("#exclude-last-draw");
-const lastDrawInput = document.querySelector("#last-draw-numbers");
 const sumRangeInput = document.querySelector("#sum-range");
 const oddRangeInput = document.querySelector("#odd-range");
 const lowRangeInput = document.querySelector("#low-range");
@@ -25,6 +31,11 @@ const storeResult = document.querySelector("#store-result");
 
 const API_DRAW = "/api/draw";
 const API_STORES = "/api/stores";
+const picked = {
+  include: new Set(),
+  exclude: new Set(),
+  lastDraw: new Set(),
+};
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -36,27 +47,6 @@ function shuffle(array) {
 
 function pickRandom(array, count) {
   return shuffle([...array]).slice(0, count);
-}
-
-function parseNumberList(text, label) {
-  if (!text.trim()) return [];
-
-  const tokens = text
-    .split(/[\s,]+/)
-    .map((v) => v.trim())
-    .filter(Boolean);
-
-  const numbers = tokens.map((token) => Number(token));
-  if (numbers.some((n) => !Number.isInteger(n) || n < 1 || n > 45)) {
-    throw new Error(`${label}에는 1~45 정수만 입력할 수 있습니다.`);
-  }
-
-  const unique = Array.from(new Set(numbers));
-  if (unique.length !== numbers.length) {
-    throw new Error(`${label}에 중복 번호가 있습니다.`);
-  }
-
-  return unique.sort((a, b) => a - b);
 }
 
 function parseMinMax(text, label, min, max) {
@@ -103,13 +93,128 @@ function getMaxSameEnding(numbers) {
   return Math.max(...counts.values());
 }
 
+function toSortedArray(setObj) {
+  return Array.from(setObj).sort((a, b) => a - b);
+}
+
+function formatPickedSummary(type) {
+  const arr = toSortedArray(picked[type]);
+  return arr.length ? arr.join(", ") : "선택 없음";
+}
+
+function syncPickerSummary() {
+  includeSummary.textContent = formatPickedSummary("include");
+  excludeSummary.textContent = formatPickedSummary("exclude");
+  lastDrawSummary.textContent = formatPickedSummary("lastDraw");
+}
+
+function buildPicker(container, type) {
+  container.innerHTML = "";
+  for (let n = 1; n <= 45; n += 1) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pick-btn";
+    btn.dataset.type = type;
+    btn.dataset.number = String(n);
+    btn.textContent = String(n);
+    container.appendChild(btn);
+  }
+}
+
+function paintPickerButtons() {
+  document.querySelectorAll(".pick-btn").forEach((btn) => {
+    const type = btn.dataset.type;
+    const n = Number(btn.dataset.number);
+    btn.classList.remove("active-include", "active-exclude", "active-lastdraw");
+    if (type === "include" && picked.include.has(n)) btn.classList.add("active-include");
+    if (type === "exclude" && picked.exclude.has(n)) btn.classList.add("active-exclude");
+    if (type === "lastDraw" && picked.lastDraw.has(n)) btn.classList.add("active-lastdraw");
+  });
+}
+
+function togglePicked(type, n) {
+  const target = picked[type];
+
+  if (target.has(n)) {
+    target.delete(n);
+    return;
+  }
+
+  if (type === "include") {
+    if (picked.include.size >= 6) {
+      throw new Error("포함 번호는 최대 6개까지 선택할 수 있습니다.");
+    }
+    if (picked.exclude.has(n) || picked.lastDraw.has(n)) {
+      throw new Error("해당 번호는 제외 계열에 이미 선택되어 있습니다.");
+    }
+  }
+
+  if (type === "exclude" || type === "lastDraw") {
+    if (picked.include.has(n)) {
+      throw new Error("해당 번호는 포함 번호로 이미 선택되어 있습니다.");
+    }
+  }
+
+  if (type === "lastDraw" && picked.lastDraw.size >= 6) {
+    throw new Error("직전회차 번호는 6개까지만 선택할 수 있습니다.");
+  }
+
+  target.add(n);
+}
+
+function onPickerClick(event) {
+  const btn = event.target.closest(".pick-btn");
+  if (!btn) return;
+
+  const type = btn.dataset.type;
+  const n = Number(btn.dataset.number);
+
+  try {
+    togglePicked(type, n);
+    generatorMessage.textContent = "옵션을 설정한 뒤 번호를 생성하세요.";
+    paintPickerButtons();
+    syncPickerSummary();
+  } catch (error) {
+    generatorMessage.textContent = `선택 실패: ${error.message}`;
+  }
+}
+
+function initPickers() {
+  buildPicker(includePicker, "include");
+  buildPicker(excludePicker, "exclude");
+  buildPicker(lastDrawPicker, "lastDraw");
+
+  includePicker.addEventListener("click", onPickerClick);
+  excludePicker.addEventListener("click", onPickerClick);
+  lastDrawPicker.addEventListener("click", onPickerClick);
+
+  clearIncludeBtn.addEventListener("click", () => {
+    picked.include.clear();
+    paintPickerButtons();
+    syncPickerSummary();
+  });
+
+  clearExcludeBtn.addEventListener("click", () => {
+    picked.exclude.clear();
+    paintPickerButtons();
+    syncPickerSummary();
+  });
+
+  clearLastDrawBtn.addEventListener("click", () => {
+    picked.lastDraw.clear();
+    paintPickerButtons();
+    syncPickerSummary();
+  });
+
+  paintPickerButtons();
+  syncPickerSummary();
+}
+
 function parseGeneratorOptions() {
-  const includeNumbers = parseNumberList(includeInput.value, "포함 번호");
-  const excludeNumbers = parseNumberList(excludeInput.value, "제외 번호");
+  const includeNumbers = toSortedArray(picked.include);
+  const excludeNumbers = toSortedArray(picked.exclude);
   const useLastDraw = excludeLastDrawInput.checked;
-  const lastDrawNumbers = useLastDraw
-    ? parseNumberList(lastDrawInput.value, "직전회차 번호")
-    : [];
+  const lastDrawNumbers = useLastDraw ? toSortedArray(picked.lastDraw) : [];
 
   if (useLastDraw && lastDrawNumbers.length !== 6) {
     throw new Error("직전회차 제외를 사용하려면 번호 6개를 입력해야 합니다.");
@@ -243,15 +348,17 @@ function renderGeneratedSets() {
 
 function resetGeneratorOptions() {
   setCountSelect.value = "3";
-  includeInput.value = "";
-  excludeInput.value = "";
+  picked.include.clear();
+  picked.exclude.clear();
+  picked.lastDraw.clear();
   excludeLastDrawInput.checked = false;
-  lastDrawInput.value = "";
   sumRangeInput.value = "100,180";
   oddRangeInput.value = "2,4";
   lowRangeInput.value = "2,4";
   maxConsecutiveSelect.value = "2";
   maxSameEndingSelect.value = "2";
+  paintPickerButtons();
+  syncPickerSummary();
   generatorMessage.textContent = "옵션을 초기화했습니다. 새 조건으로 생성하세요.";
   generatedList.innerHTML = "";
 }
@@ -388,5 +495,6 @@ checkDrawBtn.addEventListener("click", handleCheckDraw);
 loadLatestBtn.addEventListener("click", handleLoadLatest);
 storeSearchBtn.addEventListener("click", handleStoreSearch);
 
+initPickers();
 renderGeneratedSets();
 initAdsense();

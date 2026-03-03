@@ -65,19 +65,34 @@
             <option value="10">10세트</option>
           </select>
         </label>
-        <label>포함할 번호 (쉼표 구분)
-          <input id="include-numbers" type="text" placeholder="예: 7, 14" />
-        </label>
-        <label>제외할 번호 (쉼표 구분)
-          <input id="exclude-numbers" type="text" placeholder="예: 3, 9, 30" />
-        </label>
+        <div class="picker-panel">
+          <div class="picker-head">
+            <span>포함할 번호 선택 (최대 6개)</span>
+            <button id="clear-include-btn" type="button">초기화</button>
+          </div>
+          <div id="include-picker" class="number-picker"></div>
+          <p id="include-summary" class="picker-summary">선택 없음</p>
+        </div>
+        <div class="picker-panel">
+          <div class="picker-head">
+            <span>제외할 번호 선택</span>
+            <button id="clear-exclude-btn" type="button">초기화</button>
+          </div>
+          <div id="exclude-picker" class="number-picker"></div>
+          <p id="exclude-summary" class="picker-summary">선택 없음</p>
+        </div>
         <label class="inline-check">
           <input id="exclude-last-draw" type="checkbox" />
           직전회차 번호 제외 사용
         </label>
-        <label>직전회차 번호 6개 (쉼표 구분)
-          <input id="last-draw-numbers" type="text" placeholder="예: 5, 12, 24, 31, 38, 44" />
-        </label>
+        <div class="picker-panel">
+          <div class="picker-head">
+            <span>직전회차 번호 선택 (정확히 6개)</span>
+            <button id="clear-last-draw-btn" type="button">초기화</button>
+          </div>
+          <div id="last-draw-picker" class="number-picker"></div>
+          <p id="last-draw-summary" class="picker-summary">선택 없음</p>
+        </div>
         <label>합계 최소/최대 (예: 100,180)
           <input id="sum-range" type="text" value="100,180" />
         </label>
