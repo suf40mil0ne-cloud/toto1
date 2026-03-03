@@ -54,18 +54,65 @@
     </section>
 
     <section class="card" id="generator-card">
-      <h2>로또번호 생성기</h2>
-      <p class="section-desc">1부터 45까지 중복 없이 6개 번호를 세트별로 생성합니다.</p>
-      <div class="controls">
-        <label for="set-count">생성 세트 수</label>
-        <select id="set-count">
-          <option value="1">1세트</option>
-          <option value="3" selected>3세트</option>
-          <option value="5">5세트</option>
-          <option value="10">10세트</option>
-        </select>
-        <button id="generate-btn">번호 생성</button>
+      <h2>로또번호 생성기 (고급 옵션)</h2>
+      <p class="section-desc">직전회차 제외, 특정번호 포함/제외, 홀짝/합계/연속수 조건을 함께 적용해 조합을 생성합니다.</p>
+      <div class="option-grid">
+        <label>생성 세트 수
+          <select id="set-count">
+            <option value="1">1세트</option>
+            <option value="3" selected>3세트</option>
+            <option value="5">5세트</option>
+            <option value="10">10세트</option>
+          </select>
+        </label>
+        <label>포함할 번호 (쉼표 구분)
+          <input id="include-numbers" type="text" placeholder="예: 7, 14" />
+        </label>
+        <label>제외할 번호 (쉼표 구분)
+          <input id="exclude-numbers" type="text" placeholder="예: 3, 9, 30" />
+        </label>
+        <label class="inline-check">
+          <input id="exclude-last-draw" type="checkbox" />
+          직전회차 번호 제외 사용
+        </label>
+        <label>직전회차 번호 6개 (쉼표 구분)
+          <input id="last-draw-numbers" type="text" placeholder="예: 5, 12, 24, 31, 38, 44" />
+        </label>
+        <label>합계 최소/최대 (예: 100,180)
+          <input id="sum-range" type="text" value="100,180" />
+        </label>
+        <label>홀수 개수 최소/최대 (예: 2,4)
+          <input id="odd-range" type="text" value="2,4" />
+        </label>
+        <label>저번호(1~22) 개수 최소/최대 (예: 2,4)
+          <input id="low-range" type="text" value="2,4" />
+        </label>
+        <label>최대 연속번호 허용 개수
+          <select id="max-consecutive">
+            <option value="1">1개 (연속수 없음)</option>
+            <option value="2" selected>2개</option>
+            <option value="3">3개</option>
+            <option value="4">4개</option>
+            <option value="5">5개</option>
+            <option value="6">6개</option>
+          </select>
+        </label>
+        <label>동일 끝수 최대 허용 개수
+          <select id="max-same-ending">
+            <option value="1">1개</option>
+            <option value="2" selected>2개</option>
+            <option value="3">3개</option>
+            <option value="4">4개</option>
+            <option value="5">5개</option>
+            <option value="6">6개</option>
+          </select>
+        </label>
       </div>
+      <div class="controls">
+        <button id="generate-btn">조건 적용 생성</button>
+        <button id="reset-options-btn" type="button">옵션 초기화</button>
+      </div>
+      <p id="generator-message" class="updated-note">옵션을 설정한 뒤 번호를 생성하세요.</p>
       <ul id="generated-list" class="number-list"></ul>
     </section>
 

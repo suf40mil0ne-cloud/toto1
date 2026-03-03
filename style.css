@@ -228,6 +228,31 @@ a {
   margin-bottom: 12px;
 }
 
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.option-grid label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.inline-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+}
+
+.inline-check input[type="checkbox"] {
+  width: auto;
+}
+
 .row-wrap {
   flex-wrap: wrap;
 }
@@ -381,7 +406,8 @@ button:hover {
   }
 
   .content-grid,
-  .info-grid {
+  .info-grid,
+  .option-grid {
     grid-template-columns: 1fr;
   }
 
