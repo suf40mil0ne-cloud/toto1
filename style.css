@@ -131,6 +131,34 @@ a {
   font-weight: 500;
 }
 
+.jackpot-panel {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.jackpot-label {
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+.jackpot-amount {
+  margin: 6px 0 4px;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.jackpot-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.92;
+}
+
 .ad-card,
 .card,
 .info-card {
@@ -408,6 +436,16 @@ button:hover {
   border: 1px solid #e9eef5;
 }
 
+.score-badge {
+  margin-left: auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e9f8f1;
+  color: #0f7a57;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .ball {
   width: 34px;
   height: 34px;
@@ -432,6 +470,37 @@ button:hover {
   background: #fbfdff;
   padding: 14px;
   line-height: 1.55;
+}
+
+.bio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bio-item {
+  border: 1px solid #e8edf4;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+}
+
+.bio-item strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.bio-item span {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.bio-note {
+  margin-top: 10px;
+  color: #334155;
 }
 
 .result-meta {
@@ -508,7 +577,8 @@ button:hover {
 
   .content-grid,
   .info-grid,
-  .option-grid {
+  .option-grid,
+  .bio-grid {
     grid-template-columns: 1fr;
   }
 

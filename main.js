@@ -16,16 +16,22 @@ const drawInput = document.querySelector("#draw-no");
 const checkDrawBtn = document.querySelector("#check-draw-btn");
 const loadLatestBtn = document.querySelector("#load-latest-btn");
 const drawResult = document.querySelector("#draw-result");
+const latestNetAmount = document.querySelector("#latest-net-amount");
+const latestJackpotMeta = document.querySelector("#latest-jackpot-meta");
 
 const storeInput = document.querySelector("#store-draw-no");
 const storeSearchBtn = document.querySelector("#store-search-btn");
 const storeResult = document.querySelector("#store-result");
+const birthDateInput = document.querySelector("#birth-date");
+const calcBioBtn = document.querySelector("#calc-bio-btn");
+const biorhythmResult = document.querySelector("#biorhythm-result");
 
 const API_DRAW = "/api/draw";
 const API_STORES = "/api/stores";
 
 const pickedNumbers = new Set();
 let cachedLatestDrawNumbers = [];
+let currentBioScore = null;
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -57,6 +63,54 @@ function createBall(number) {
   span.style.background = ballColor(number);
   span.textContent = String(number);
   return span;
+}
+
+function calculateTakeHomeAmount(gross) {
+  const amount = Number(gross);
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+  if (amount <= 3_000_000) return amount;
+  if (amount <= 300_000_000) return Math.floor(amount * 0.78);
+  return Math.floor(300_000_000 * 0.78 + (amount - 300_000_000) * 0.67);
+}
+
+function calculateBiorhythm(dateString) {
+  const birthDate = new Date(dateString);
+  if (Number.isNaN(birthDate.getTime())) {
+    throw new Error("올바른 생년월일을 입력하세요.");
+  }
+
+  const now = new Date();
+  birthDate.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  const days = Math.floor((now.getTime() - birthDate.getTime()) / (24 * 60 * 60 * 1000));
+  if (days < 0) {
+    throw new Error("미래 날짜는 입력할 수 없습니다.");
+  }
+
+  const cycleValue = (period) => Math.sin((2 * Math.PI * days) / period);
+  const toScore = (raw) => Math.round((raw + 1) * 50);
+
+  const physical = toScore(cycleValue(23));
+  const emotional = toScore(cycleValue(28));
+  const intellectual = toScore(cycleValue(33));
+  const overall = Math.round(physical * 0.4 + emotional * 0.35 + intellectual * 0.25);
+
+  return { days, physical, emotional, intellectual, overall };
+}
+
+function calculateSetQuality(numbers) {
+  const oddCount = numbers.filter((n) => n % 2 === 1).length;
+  const sum = numbers.reduce((acc, n) => acc + n, 0);
+  const low = numbers.filter((n) => n <= 15).length;
+  const mid = numbers.filter((n) => n > 15 && n <= 30).length;
+  const high = numbers.filter((n) => n > 30).length;
+
+  const parityScore = Math.max(0, 100 - Math.abs(oddCount - 3) * 22);
+  const sumScore = Math.max(0, 100 - Math.abs(sum - 138));
+  const spreadPenalty = Math.abs(low - 2) + Math.abs(mid - 2) + Math.abs(high - 2);
+  const spreadScore = Math.max(0, 100 - spreadPenalty * 22);
+
+  return Math.round(parityScore * 0.34 + sumScore * 0.33 + spreadScore * 0.33);
 }
 
 function buildModePicker() {
@@ -193,6 +247,16 @@ function renderGeneratedSets() {
       li.appendChild(label);
 
       numbers.forEach((num) => li.appendChild(createBall(num)));
+
+      if (currentBioScore !== null) {
+        const setQuality = calculateSetQuality(numbers);
+        const finalScore = Math.round(setQuality * 0.55 + currentBioScore * 0.45);
+        const badge = document.createElement("span");
+        badge.className = "score-badge";
+        badge.textContent = `구매 점수 ${finalScore}점`;
+        li.appendChild(badge);
+      }
+
       generatedList.appendChild(li);
     }
 
@@ -290,6 +354,12 @@ function renderDrawResult(data) {
   drawResult.append(title, ballsWrap, prize);
 }
 
+function updateLatestJackpot(data) {
+  const net = calculateTakeHomeAmount(data.firstWinamnt);
+  latestNetAmount.textContent = net > 0 ? `${net.toLocaleString()}원` : "정보 없음";
+  latestJackpotMeta.textContent = `${data.drwNo}회 (${data.drwNoDate}) · 세전 ${Number(data.firstWinamnt || 0).toLocaleString()}원 · 1등 ${Number(data.firstPrzwnerCo || 0).toLocaleString()}명`;
+}
+
 function renderStoreResult(drawNo, stores) {
   if (!stores.length) {
     storeResult.textContent = `${drawNo}회 판매점 정보를 찾지 못했습니다.`;
@@ -336,8 +406,44 @@ async function handleLoadLatest() {
     drawInput.value = body.data.drwNo;
     storeInput.value = body.data.drwNo;
     renderDrawResult(body.data);
+    updateLatestJackpot(body.data);
   } catch (error) {
     drawResult.textContent = `최신 회차 조회 실패: ${error.message}`;
+  }
+}
+
+async function loadLatestSummary() {
+  try {
+    const body = await requestJson(`${API_DRAW}?drawNo=latest`);
+    drawInput.value = body.data.drwNo;
+    storeInput.value = body.data.drwNo;
+    updateLatestJackpot(body.data);
+  } catch (error) {
+    latestNetAmount.textContent = "조회 실패";
+    latestJackpotMeta.textContent = error.message;
+  }
+}
+
+function handleCalculateBiorhythm() {
+  try {
+    if (!birthDateInput.value) {
+      throw new Error("생년월일을 먼저 입력하세요.");
+    }
+    const result = calculateBiorhythm(birthDateInput.value);
+    currentBioScore = result.overall;
+    biorhythmResult.innerHTML = `
+      <strong>오늘의 바이오리듬 종합 점수: ${result.overall}점</strong>
+      <div class="bio-grid">
+        <div class="bio-item"><strong>신체 리듬</strong><span>${result.physical}점</span></div>
+        <div class="bio-item"><strong>감성 리듬</strong><span>${result.emotional}점</span></div>
+        <div class="bio-item"><strong>지성 리듬</strong><span>${result.intellectual}점</span></div>
+        <div class="bio-item"><strong>로또 구매 적합도</strong><span>${result.overall}점</span></div>
+      </div>
+      <p class="bio-note">번호 생성 시 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
+    `;
+  } catch (error) {
+    currentBioScore = null;
+    biorhythmResult.textContent = `계산 실패: ${error.message}`;
   }
 }
 
@@ -391,10 +497,13 @@ resetOptionsBtn.addEventListener("click", resetGeneratorOptions);
 checkDrawBtn.addEventListener("click", handleCheckDraw);
 loadLatestBtn.addEventListener("click", handleLoadLatest);
 storeSearchBtn.addEventListener("click", handleStoreSearch);
+calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
 
 buildModePicker();
 updateModeUI();
 paintModePicker();
 syncModePickedSummary();
-renderGeneratedSets();
+generatedList.innerHTML = "";
+generatorMessage.textContent = "실행 버튼을 눌러 번호를 생성하세요.";
+loadLatestSummary();
 initAdsense();

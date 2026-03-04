@@ -1,5 +1,6 @@
 const OFFICIAL_STORE_URL = "https://www.dhlottery.co.kr/store.do?method=topStore&pageGubun=L645";
 const NAVER_SEARCH_URL = "https://search.naver.com/search.naver";
+const GOOGLE_NEWS_RSS_URL = "https://news.google.com/rss/search";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -61,6 +62,19 @@ function stripTagsFromHtml(value) {
     .replace(/&quot;/g, '"')
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function decodeHtml(value) {
+  return value
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
+function stripAllTags(value) {
+  return decodeHtml(value).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function parseNaverStores(html) {
@@ -131,6 +145,62 @@ async function fetchStoresFromNaver(drawNo) {
   return parsed.stores;
 }
 
+function parseGoogleNewsItems(xml) {
+  return Array.from(xml.matchAll(/<item>([\s\S]*?)<\/item>/g)).map((m) => m[1]);
+}
+
+function parseGoogleStores(xml, drawNo) {
+  const items = parseGoogleNewsItems(xml);
+  const stores = [];
+
+  for (const item of items) {
+    const titleRaw = item.match(/<title>([\s\S]*?)<\/title>/)?.[1] || "";
+    const descRaw = item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || "";
+    const sourceRaw = item.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1] || "";
+    const title = stripAllTags(titleRaw);
+    const desc = stripAllTags(descRaw);
+    const source = stripAllTags(sourceRaw);
+
+    if (!new RegExp(`${drawNo}회`).test(title + desc)) continue;
+    if (!/(당첨판매점|당첨지역|배출점|로또)/.test(title + desc)) continue;
+
+    stores.push({
+      rank: "1등",
+      name: title || "구글 뉴스 결과",
+      method: "Google 뉴스 요약",
+      address: source || "-",
+    });
+
+    if (stores.length >= 5) break;
+  }
+
+  if (!stores.length) {
+    throw new Error("구글 검색 결과에서 판매점 관련 정보를 찾지 못했습니다.");
+  }
+
+  return stores;
+}
+
+async function fetchStoresFromGoogle(drawNo) {
+  const query = `${drawNo}회 로또 당첨판매점`;
+  const target = `${GOOGLE_NEWS_RSS_URL}?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`;
+  const res = await fetch(target, {
+    headers: {
+      "user-agent": "Mozilla/5.0",
+      accept: "application/rss+xml,application/xml,text/xml",
+      referer: "https://news.google.com/",
+    },
+    cf: { cacheTtl: 180, cacheEverything: false },
+  });
+
+  if (!res.ok) {
+    throw new Error(`구글 뉴스 RSS 호출 실패: HTTP ${res.status}`);
+  }
+
+  const xml = await res.text();
+  return parseGoogleStores(xml, drawNo);
+}
+
 export async function onRequestGet({ request }) {
   try {
     const url = new URL(request.url);
@@ -162,8 +232,13 @@ export async function onRequestGet({ request }) {
       // fall through to naver fallback
     }
 
-    const stores = await fetchStoresFromNaver(drawNo);
-    return json({ ok: true, source: "naver-search", drawNo, count: stores.length, stores });
+    try {
+      const stores = await fetchStoresFromNaver(drawNo);
+      return json({ ok: true, source: "naver-search", drawNo, count: stores.length, stores });
+    } catch (naverError) {
+      const stores = await fetchStoresFromGoogle(drawNo);
+      return json({ ok: true, source: "google-news", drawNo, count: stores.length, stores });
+    }
   } catch (error) {
     return json({ ok: false, error: error.message || "알 수 없는 서버 오류" }, 500);
   }

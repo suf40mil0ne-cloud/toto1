@@ -36,6 +36,11 @@
       <p class="kicker">LOTTO DATA SERVICE</p>
       <h1>로또 번호 추천과<br />당첨 데이터 확인을 한 번에</h1>
       <p class="hero-desc">동행복권 공개 데이터를 기준으로 매 회차 정보를 빠르게 제공합니다.</p>
+      <div class="jackpot-panel">
+        <p class="jackpot-label">직전회차 1등 예상 실수령액</p>
+        <p id="latest-net-amount" class="jackpot-amount">로딩 중...</p>
+        <p id="latest-jackpot-meta" class="jackpot-meta">최신 회차를 불러오는 중입니다.</p>
+      </div>
     </section>
 
     <section class="card" id="editorial-card">
@@ -93,6 +98,17 @@
       </div>
       <p id="generator-message" class="updated-note">방식을 선택하고 번호를 생성하세요.</p>
       <ul id="generated-list" class="number-list"></ul>
+    </section>
+
+    <section class="card" id="biorhythm-card">
+      <h2>생년월일 바이오리듬 점수</h2>
+      <p class="section-desc">오늘 기준 바이오리듬 점수를 계산하고, 로또 번호 생성 점수와 함께 확인합니다.</p>
+      <div class="controls row-wrap">
+        <label for="birth-date">생년월일</label>
+        <input type="date" id="birth-date" />
+        <button id="calc-bio-btn" type="button">바이오리듬 계산</button>
+      </div>
+      <div id="biorhythm-result" class="result-box">생년월일을 입력해 점수를 계산하세요.</div>
     </section>
 
     <section class="card" id="draw-card">
