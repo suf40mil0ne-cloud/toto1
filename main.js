@@ -29,13 +29,12 @@ if ("scrollRestoration" in history) {
 }
 window.scrollTo(0, 0);
 
-// 전역 리듬 프로필 상태
+// 전역 리듬 상태
 let currentBioScore = null;
 let currentBioProfile = null;
 
-/**
- * 유틸리티: 가중치 랜덤 추출 (중복 없음)
- */
+const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
+
 function pickWeightedUnique(pool, count, getWeight) {
   const source = [...pool];
   const picked = [];
@@ -43,8 +42,8 @@ function pickWeightedUnique(pool, count, getWeight) {
     if (!source.length) break;
     const weights = source.map((n) => Math.max(0.01, Number(getWeight(n)) || 0));
     const total = weights.reduce((acc, v) => acc + v, 0);
-    let selectedIndex = -1;
     let threshold = Math.random() * total;
+    let selectedIndex = -1;
     for (let j = 0; j < source.length; j += 1) {
       threshold -= weights[j];
       if (threshold <= 0) {
@@ -83,9 +82,6 @@ function calculateTakeHomeAmount(gross) {
   return Math.floor(300_000_000 * 0.78 + (amount - 300_000_000) * 0.67);
 }
 
-/**
- * 바이오리듬 계산 로직
- */
 function calculateBiorhythm(dateString) {
   const { year, month, day } = dateString;
   const birthDate = new Date(year, month - 1, day);
@@ -94,19 +90,13 @@ function calculateBiorhythm(dateString) {
   now.setHours(0, 0, 0, 0);
   const days = Math.floor((now.getTime() - birthDate.getTime()) / (24 * 60 * 60 * 1000));
   if (days < 0) throw new Error("미래 날짜는 입력할 수 없습니다.");
-  
   const cycleValue = (period, offset = 0) => Math.sin((2 * Math.PI * (days + offset)) / period);
+  
   const p = Math.round((cycleValue(23) + 1) * 50);
   const e = Math.round((cycleValue(28) + 1) * 50);
   const i = Math.round((cycleValue(33) + 1) * 50);
   
-  return {
-    days,
-    physical: p,
-    emotional: e,
-    intellectual: i,
-    overall: Math.round(p * 0.4 + e * 0.35 + i * 0.25)
-  };
+  return { days, physical: p, emotional: e, intellectual: i, overall: Math.round(p * 0.4 + e * 0.35 + i * 0.25) };
 }
 
 function normalizeBirthDateInput(raw) {
@@ -119,23 +109,21 @@ function normalizeBirthDateInput(raw) {
 }
 
 /**
- * 가중치 프로필 생성
+ * 신규: 하모닉 모듈로 패턴 프로필 생성
  */
 function buildBioProfile(rhythm, strength = "medium") {
-  const factor = strength === "weak" ? 0.3 : strength === "strong" ? 4.0 : 1.0;
+  const factor = strength === "weak" ? 0.3 : strength === "strong" ? 3.0 : 1.0;
   const adjust = (val) => 1 + (val - 1) * factor;
+  
   return {
-    lowWeight: adjust(0.7 + rhythm.physical / 100),
-    midWeight: adjust(0.7 + rhythm.emotional / 100),
-    highWeight: adjust(0.7 + rhythm.intellectual / 100),
-    oddWeight: adjust(rhythm.overall >= 50 ? 1.2 : 0.8),
-    evenWeight: adjust(rhythm.overall < 50 ? 1.2 : 0.8)
+    mod1Weight: adjust(0.5 + rhythm.physical / 50),    // n % 3 === 1 (신체)
+    mod2Weight: adjust(0.5 + rhythm.emotional / 50),   // n % 3 === 2 (감성)
+    mod0Weight: adjust(0.5 + rhythm.intellectual / 50),// n % 3 === 0 (지성)
+    primeWeight: adjust(rhythm.overall >= 50 ? 1.3 : 0.8),
+    overall: rhythm.overall
   };
 }
 
-/**
- * 그래프 그리기
- */
 function drawBiorhythmChart(canvas, days) {
   const ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height;
   const paddingX = 40, paddingY = 40, chartW = w - paddingX * 2, chartH = h - paddingY * 2, centerY = h / 2;
@@ -164,9 +152,6 @@ function drawBiorhythmChart(canvas, days) {
   drawWave(23, "#f59e0b"); drawWave(28, "#ef4444"); drawWave(33, "#3b82f6");
 }
 
-/**
- * STEP 01: 바이오리듬 분석 실행
- */
 function handleCalculateBiorhythm() {
   try {
     const birthDate = normalizeBirthDateInput(birthDateInput.value);
@@ -178,83 +163,58 @@ function handleCalculateBiorhythm() {
     
     biorhythmResult.innerHTML = `
       <div class="bio-chart-container">
-        <p style="text-align:center; font-weight:800; margin-bottom:15px; color:var(--brand);">오늘의 바이오리듬 에너지 (종합 ${result.overall}%)</p>
+        <p style="text-align:center; font-weight:800; margin-bottom:15px; color:var(--brand);">오늘의 리듬 하모니 (종합 ${result.overall}%)</p>
         <canvas id="bio-canvas" width="800" height="300" style="width:100%; height:auto;"></canvas>
         <div class="bio-legend" style="display:flex; justify-content:center; gap:15px; margin-top:15px; font-size:0.85rem; font-weight:700;">
-          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#f59e0b; display:inline-block;"></span> 신체</div>
-          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#ef4444; display:inline-block;"></span> 감성</div>
-          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#3b82f6; display:inline-block;"></span> 지성</div>
+          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#f59e0b; display:inline-block;"></span> 신체에너지</div>
+          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#ef4444; display:inline-block;"></span> 감성에너지</div>
+          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#3b82f6; display:inline-block;"></span> 지성에너지</div>
         </div>
       </div>
     `;
     drawBiorhythmChart(document.querySelector("#bio-canvas"), result.days);
-    generatorMessage.textContent = "분석이 완료되었습니다! STEP 02에서 리듬 번호를 생성하세요.";
-    generatorMessage.style.color = "var(--brand)";
+    generatorMessage.textContent = "리듬 패턴 분석 완료! 이제 번호를 생성하세요.";
   } catch (error) { biorhythmResult.textContent = error.message; }
 }
 
-/**
- * STEP 02: 리듬 연동 번호 추출
- */
 async function renderGeneratedSets() {
-  if (!currentBioProfile) {
-    alert("먼저 STEP 01에서 리듬 분석을 진행해주세요.");
-    return;
-  }
-  
+  if (!currentBioProfile) { alert("먼저 STEP 01에서 리듬 분석을 진행해주세요."); return; }
   generatedList.innerHTML = "";
-  const setCount = Number(setCountSelect.value);
-  const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+  const setCount = Number(setCountSelect.value), pool = Array.from({ length: 45 }, (_, i) => i + 1);
   
   for (let i = 0; i < setCount; i += 1) {
     const numbers = pickWeightedUnique(pool, 6, (n) => {
-      let w = n <= 15 ? currentBioProfile.lowWeight : n <= 30 ? currentBioProfile.midWeight : currentBioProfile.highWeight;
-      w *= (n % 2 === 0 ? currentBioProfile.evenWeight : currentBioProfile.oddWeight);
+      let w = 1.0;
+      // 모듈로 그룹 가중치 반영 (전구간 분산)
+      if (n % 3 === 1) w *= currentBioProfile.mod1Weight;
+      else if (n % 3 === 2) w *= currentBioProfile.mod2Weight;
+      else w *= currentBioProfile.mod0Weight;
+      
+      // 소수(Prime) 가중치 반영
+      if (PRIMES.includes(n)) w *= currentBioProfile.primeWeight;
+      
       return w;
     }).sort((a, b) => a - b);
     
-    const li = document.createElement("li"); 
-    li.className = "number-set";
-    const label = document.createElement("span"); 
-    label.style.fontWeight = "800"; 
-    label.style.marginRight = "1rem"; 
-    label.textContent = `${i + 1}SET`;
+    const li = document.createElement("li"); li.className = "number-set";
+    const label = document.createElement("span"); label.style.fontWeight = "800"; label.style.marginRight = "1rem"; label.textContent = `${i + 1}SET`;
     li.appendChild(label);
-    
     numbers.forEach(n => li.appendChild(createBall(n)));
     
-    const quality = Math.round(currentBioScore * 0.6 + (Math.random() * 20 + 20) * 0.4);
-    const badge = document.createElement("span"); 
-    badge.className = "badge"; 
-    badge.style.marginLeft = "auto"; 
-    badge.textContent = `적합도 ${quality}%`;
+    const quality = Math.round(currentBioProfile.overall * 0.7 + (Math.random() * 30));
+    const badge = document.createElement("span"); badge.className = "badge"; badge.style.marginLeft = "auto"; badge.style.background = "var(--brand-2)";
+    badge.textContent = `적합도 ${Math.min(99, quality)}%`;
     li.appendChild(badge);
-    
     generatedList.appendChild(li);
   }
-  generatorMessage.textContent = `${setCount}세트의 리듬 번호가 생성되었습니다.`;
-  generatorMessage.style.color = "var(--ink-soft)";
+  generatorMessage.textContent = `${setCount}세트의 리듬 최적화 조합이 생성되었습니다.`;
 }
 
-/**
- * API 데이터 처리
- */
 async function requestJson(url) {
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    const text = await res.text();
-    let body;
-    try {
-      body = JSON.parse(text);
-    } catch (e) {
-      throw new Error("서버 응답이 올바른 JSON 형식이 아닙니다.");
-    }
-    if (!res.ok || !body.ok) throw new Error(body.error || "데이터 요청 실패");
-    return body;
-  } catch (e) {
-    console.error("API 요청 오류:", e);
-    throw e;
-  }
+  const res = await fetch(url, { cache: "no-store" });
+  const body = await res.json();
+  if (!res.ok || !body.ok) throw new Error(body.error || "데이터 요청 실패");
+  return body;
 }
 
 async function handleCheckDraw() {
@@ -268,7 +228,7 @@ async function handleCheckDraw() {
     [d.drwtNo1, d.drwtNo2, d.drwtNo3, d.drwtNo4, d.drwtNo5, d.drwtNo6].forEach(n => target.appendChild(createBall(n)));
     const bLabel = document.createElement("span"); bLabel.textContent = "+"; bLabel.style.margin = "0 5px"; target.appendChild(bLabel);
     target.appendChild(createBall(d.bnusNo));
-  } catch (e) { drawResult.textContent = "조회 실패: " + e.message; }
+  } catch (e) { drawResult.textContent = "조회 실패"; }
 }
 
 async function handleStoreSearch() {
@@ -283,7 +243,7 @@ async function handleStoreSearch() {
         storeResult.querySelector("ul").appendChild(li);
       });
     }
-  } catch (e) { storeResult.textContent = "조회 실패: " + e.message; }
+  } catch (e) { storeResult.textContent = "조회 실패"; }
 }
 
 async function initLatestData() {
@@ -296,18 +256,16 @@ async function initLatestData() {
     drawInput.value = d.drwNo;
     storeInput.value = d.drwNo;
   } catch (e) {
-    latestNetAmount.textContent = "데이터 오류";
-    latestJackpotMeta.textContent = "상세 사유: " + e.message;
+    latestNetAmount.textContent = "연결 지연";
+    latestJackpotMeta.textContent = "새로고침을 눌러주세요.";
   }
 }
 
-// 이벤트 리스너 등록
 calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
 generateBtn.addEventListener("click", renderGeneratedSets);
 resetOptionsBtn.addEventListener("click", () => {
   currentBioProfile = null; currentBioScore = null; generatedList.innerHTML = "";
   biorhythmResult.innerHTML = "생년월일을 입력하면 리듬 분석 그래프가 나타납니다.";
-  generatorMessage.textContent = "초기화되었습니다.";
 });
 loadLatestBtn.addEventListener("click", async () => { await initLatestData(); handleCheckDraw(); });
 checkDrawBtn.addEventListener("click", handleCheckDraw);
@@ -317,5 +275,4 @@ document.querySelectorAll('input[name="bio-strength"]').forEach(r => {
   r.addEventListener("change", () => { if (birthDateInput.value.replace(/\D/g, "").length === 8) handleCalculateBiorhythm(); });
 });
 
-// 초기 데이터 로드
 initLatestData();
