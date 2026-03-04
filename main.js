@@ -29,11 +29,37 @@ if ("scrollRestoration" in history) {
 }
 window.scrollTo(0, 0);
 
-// 전역 리듬 상태
+// 전역 상태
 let currentBioScore = null;
 let currentBioProfile = null;
+let historicalDraws = []; // {drwNo, numbers[]}
+let isSyncing = false;
 
 const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
+
+/**
+ * 하모닉 스코어 계산기: 특정 번호 조합이 리듬 프로필과 얼마나 일치하는지 점수화 (0-100)
+ */
+function calculateHarmonicScore(numbers, profile) {
+  if (!profile) return 0;
+  
+  let totalWeight = 0;
+  numbers.forEach(n => {
+    let w = 1.0;
+    if (n % 3 === 1) w *= profile.mod1Weight;
+    else if (n % 3 === 2) w *= profile.mod2Weight;
+    else w *= profile.mod0Weight;
+    
+    if (PRIMES.includes(n)) w *= profile.primeWeight;
+    totalWeight += w;
+  });
+
+  // 점수 정규화 (가중치 합을 기반으로 0~100점 사이로 변환)
+  // 이론상 최대 가중치는 강한 설정 시 각 숫자당 약 4.0 이상이므로, 적절한 분모 설정
+  const baseAvg = totalWeight / 6;
+  let score = Math.round(baseAvg * 25); 
+  return Math.min(99, Math.max(10, score));
+}
 
 function pickWeightedUnique(pool, count, getWeight) {
   const source = [...pool];
@@ -108,17 +134,14 @@ function normalizeBirthDateInput(raw) {
   return { year, month, day, compact: digits };
 }
 
-/**
- * 신규: 하모닉 모듈로 패턴 프로필 생성
- */
 function buildBioProfile(rhythm, strength = "medium") {
   const factor = strength === "weak" ? 0.3 : strength === "strong" ? 3.0 : 1.0;
   const adjust = (val) => 1 + (val - 1) * factor;
   
   return {
-    mod1Weight: adjust(0.5 + rhythm.physical / 50),    // n % 3 === 1 (신체)
-    mod2Weight: adjust(0.5 + rhythm.emotional / 50),   // n % 3 === 2 (감성)
-    mod0Weight: adjust(0.5 + rhythm.intellectual / 50),// n % 3 === 0 (지성)
+    mod1Weight: adjust(0.5 + rhythm.physical / 50),
+    mod2Weight: adjust(0.5 + rhythm.emotional / 50),
+    mod0Weight: adjust(0.5 + rhythm.intellectual / 50),
     primeWeight: adjust(rhythm.overall >= 50 ? 1.3 : 0.8),
     overall: rhythm.overall
   };
@@ -177,6 +200,18 @@ function handleCalculateBiorhythm() {
   } catch (error) { biorhythmResult.textContent = error.message; }
 }
 
+/**
+ * 역대 당첨 데이터 기반 상대적 순위 계산
+ */
+function getRhythmRank(score) {
+  if (historicalDraws.length < 100) return null;
+  
+  const allScores = historicalDraws.map(d => calculateHarmonicScore(d.numbers, currentBioProfile));
+  const higher = allScores.filter(s => s > score).length;
+  const percent = ((higher / allScores.length) * 100).toFixed(1);
+  return percent;
+}
+
 async function renderGeneratedSets() {
   if (!currentBioProfile) { alert("먼저 STEP 01에서 리듬 분석을 진행해주세요."); return; }
   generatedList.innerHTML = "";
@@ -185,29 +220,74 @@ async function renderGeneratedSets() {
   for (let i = 0; i < setCount; i += 1) {
     const numbers = pickWeightedUnique(pool, 6, (n) => {
       let w = 1.0;
-      // 모듈로 그룹 가중치 반영 (전구간 분산)
       if (n % 3 === 1) w *= currentBioProfile.mod1Weight;
       else if (n % 3 === 2) w *= currentBioProfile.mod2Weight;
       else w *= currentBioProfile.mod0Weight;
-      
-      // 소수(Prime) 가중치 반영
       if (PRIMES.includes(n)) w *= currentBioProfile.primeWeight;
-      
       return w;
     }).sort((a, b) => a - b);
     
+    const score = calculateHarmonicScore(numbers, currentBioProfile);
+    const rank = getRhythmRank(score);
+    const rankText = rank !== null ? ` (역대 상위 ${rank}%)` : "";
+
     const li = document.createElement("li"); li.className = "number-set";
     const label = document.createElement("span"); label.style.fontWeight = "800"; label.style.marginRight = "1rem"; label.textContent = `${i + 1}SET`;
     li.appendChild(label);
     numbers.forEach(n => li.appendChild(createBall(n)));
     
-    const quality = Math.round(currentBioProfile.overall * 0.7 + (Math.random() * 30));
     const badge = document.createElement("span"); badge.className = "badge"; badge.style.marginLeft = "auto"; badge.style.background = "var(--brand-2)";
-    badge.textContent = `적합도 ${Math.min(99, quality)}%`;
+    badge.textContent = `리듬 점수 ${score}점${rankText}`;
     li.appendChild(badge);
     generatedList.appendChild(li);
   }
   generatorMessage.textContent = `${setCount}세트의 리듬 최적화 조합이 생성되었습니다.`;
+}
+
+/**
+ * 역대 데이터 동기화 로직 (LocalStorage 활용)
+ */
+async function syncHistoricalData(latestNo) {
+  if (isSyncing) return;
+  isSyncing = true;
+  
+  const savedData = localStorage.getItem("lotto_history");
+  let draws = savedData ? JSON.parse(savedData) : [];
+  const startNo = draws.length > 0 ? draws[draws.length - 1].drwNo + 1 : 1;
+  
+  if (startNo > latestNo) {
+    historicalDraws = draws;
+    isSyncing = false;
+    return;
+  }
+
+  console.log(`역대 데이터 동기화 시작: ${startNo}회부터`);
+  
+  // 브라우저 차단 방지를 위해 묶음 단위로 가져옴
+  for (let i = startNo; i <= latestNo; i++) {
+    try {
+      const body = await requestJson(`${API_DRAW}?drawNo=${i}`);
+      if (body.ok) {
+        const d = body.data;
+        draws.push({
+          drwNo: d.drwNo,
+          numbers: [d.drwtNo1, d.drwtNo2, d.drwtNo3, d.drwtNo4, d.drwtNo5, d.drwtNo6]
+        });
+        // 50회차마다 중간 저장
+        if (i % 50 === 0) localStorage.setItem("lotto_history", JSON.stringify(draws));
+      }
+      // 서버 부하 방지용 딜레이
+      if (i % 10 === 0) await new Promise(r => setTimeout(r, 100));
+    } catch (e) {
+      console.warn(`${i}회차 로딩 실패, 중단함.`);
+      break;
+    }
+  }
+  
+  localStorage.setItem("lotto_history", JSON.stringify(draws));
+  historicalDraws = draws;
+  isSyncing = false;
+  console.log("역대 데이터 동기화 완료.");
 }
 
 async function requestJson(url) {
@@ -255,6 +335,9 @@ async function initLatestData() {
     latestJackpotMeta.textContent = `${d.drwNo}회 (${d.drwNoDate}) · 세전 ${Number(d.firstWinamnt).toLocaleString()}원`;
     drawInput.value = d.drwNo;
     storeInput.value = d.drwNo;
+    
+    // 역대 데이터 동기화 시작
+    syncHistoricalData(d.drwNo);
   } catch (e) {
     latestNetAmount.textContent = "연결 지연";
     latestJackpotMeta.textContent = "새로고침을 눌러주세요.";
