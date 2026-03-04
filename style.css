@@ -550,6 +550,36 @@ button:hover {
 .bio-bar-fill.intellectual { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
 .bio-bar-fill.overall { background: linear-gradient(90deg, #34d399, #10b981); }
 
+.bio-chart-container {
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px;
+  position: relative;
+}
+
+#bio-canvas {
+  width: 100%;
+  height: 200px;
+  display: block;
+}
+
+.bio-legend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.p { background: #f59e0b; }
+.dot.e { background: #ef4444; }
+.dot.i { background: #3b82f6; }
+
 .bio-note {
   margin-top: 10px;
   color: #334155;

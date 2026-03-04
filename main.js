@@ -24,7 +24,6 @@ const storeSearchBtn = document.querySelector("#store-search-btn");
 const storeResult = document.querySelector("#store-result");
 const birthDateInput = document.querySelector("#birth-date-simple");
 const calcBioBtn = document.querySelector("#calc-bio-btn");
-// ... (previous constants)
 const biorhythmResult = document.querySelector("#biorhythm-result");
 
 const API_DRAW = "/api/draw";
@@ -37,7 +36,6 @@ if ("scrollRestoration" in history) {
 window.scrollTo(0, 0);
 
 const pickedNumbers = new Set();
-// ... (rest of the code)
 let cachedLatestDrawNumbers = [];
 let currentBioScore = null;
 let currentBioProfile = null;
@@ -126,7 +124,7 @@ function calculateBiorhythm(dateString) {
     throw new Error("미래 날짜는 입력할 수 없습니다.");
   }
 
-  const cycleValue = (period) => Math.sin((2 * Math.PI * days) / period);
+  const cycleValue = (period, offset = 0) => Math.sin((2 * Math.PI * (days + offset)) / period);
   const toScore = (raw) => Math.round((raw + 1) * 50);
 
   const physical = toScore(cycleValue(23));
@@ -236,6 +234,57 @@ function getBioNumberWeight(number, profile) {
   const parityWeight = number % 2 === 0 ? profile.evenWeight : profile.oddWeight;
   const luckyWeight = profile.luckyNumbers.includes(number) ? profile.luckyWeight : 1;
   return rangeWeight * parityWeight * luckyWeight;
+}
+
+function drawBiorhythmChart(canvas, days) {
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  const padding = 30;
+  const chartW = w - padding * 2;
+  const chartH = h - padding * 2;
+  const centerY = h / 2;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // 그리드 (가로선)
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padding, centerY);
+  ctx.lineTo(w - padding, centerY);
+  ctx.stroke();
+
+  // 중앙 오늘 선
+  ctx.strokeStyle = "#94a3b8";
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(w / 2, padding);
+  ctx.lineTo(w / 2, h - padding);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = "12px sans-serif";
+  ctx.fillText("오늘", w / 2 - 10, padding - 10);
+
+  const drawCycle = (period, color) => {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let x = 0; x <= chartW; x += 1) {
+      const offset = ((x / chartW) - 0.5) * 30; // -15일 ~ +15일
+      const val = Math.sin((2 * Math.PI * (days + offset)) / period);
+      const y = centerY - val * (chartH / 2);
+      if (x === 0) ctx.moveTo(padding + x, y);
+      else ctx.lineTo(padding + x, y);
+    }
+    ctx.stroke();
+  };
+
+  drawCycle(23, "#f59e0b"); // 물리
+  drawCycle(28, "#ef4444"); // 감성
+  drawCycle(33, "#3b82f6"); // 지성
 }
 
 function calculateSetQuality(numbers) {
@@ -605,6 +654,16 @@ function handleCalculateBiorhythm() {
           <div class="bio-bar-bg"><div class="bio-bar-fill overall" style="width: ${result.overall}%"></div></div>
         </div>
       </div>
+
+      <div class="bio-chart-container">
+        <canvas id="bio-canvas" width="600" height="200"></canvas>
+        <div class="bio-legend">
+          <div class="legend-item"><span class="dot p"></span> 물리</div>
+          <div class="legend-item"><span class="dot e"></span> 감성</div>
+          <div class="legend-item"><span class="dot i"></span> 지성</div>
+        </div>
+      </div>
+
       <p class="bio-note">연동 강도: ${strength === "weak" ? "약" : strength === "strong" ? "강" : "중"}</p>
       <div class="bio-lucky-wrap" style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e9eef5;">
         <p style="margin: 0 0 8px; font-weight: 700; font-size: 0.9rem;">연동 추천 번호 (6개)</p>
@@ -612,6 +671,9 @@ function handleCalculateBiorhythm() {
       </div>
       <p class="bio-note">번호 생성 시 바이오리듬 가중치로 숫자 풀을 먼저 선별하고, 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
     `;
+
+    const canvas = document.querySelector("#bio-canvas");
+    drawBiorhythmChart(canvas, result.days);
 
     const luckyBallsContainer = biorhythmResult.querySelector("#bio-lucky-balls");
     bioProfile.luckyNumbers.forEach((num) => {
