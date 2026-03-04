@@ -22,7 +22,7 @@ const latestJackpotMeta = document.querySelector("#latest-jackpot-meta");
 const storeInput = document.querySelector("#store-draw-no");
 const storeSearchBtn = document.querySelector("#store-search-btn");
 const storeResult = document.querySelector("#store-result");
-const birthDateInput = document.querySelector("#birth-date");
+const birthDateInput = document.querySelector("#birth-date-simple");
 const calcBioBtn = document.querySelector("#calc-bio-btn");
 const biorhythmResult = document.querySelector("#biorhythm-result");
 
@@ -32,6 +32,7 @@ const API_STORES = "/api/stores";
 const pickedNumbers = new Set();
 let cachedLatestDrawNumbers = [];
 let currentBioScore = null;
+let currentBioProfile = null;
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -43,6 +44,38 @@ function shuffle(array) {
 
 function pickRandom(array, count) {
   return shuffle([...array]).slice(0, count);
+}
+
+function pickWeightedUnique(pool, count, getWeight) {
+  const source = [...pool];
+  const picked = [];
+
+  for (let i = 0; i < count; i += 1) {
+    if (!source.length) break;
+
+    const weights = source.map((n) => Math.max(0, Number(getWeight(n)) || 0));
+    const total = weights.reduce((acc, v) => acc + v, 0);
+    let selectedIndex = -1;
+
+    if (total <= 0) {
+      selectedIndex = Math.floor(Math.random() * source.length);
+    } else {
+      let threshold = Math.random() * total;
+      for (let j = 0; j < source.length; j += 1) {
+        threshold -= weights[j];
+        if (threshold <= 0) {
+          selectedIndex = j;
+          break;
+        }
+      }
+      if (selectedIndex < 0) selectedIndex = source.length - 1;
+    }
+
+    picked.push(source[selectedIndex]);
+    source.splice(selectedIndex, 1);
+  }
+
+  return picked;
 }
 
 function toSortedArray(setObj) {
@@ -74,10 +107,8 @@ function calculateTakeHomeAmount(gross) {
 }
 
 function calculateBiorhythm(dateString) {
-  const birthDate = new Date(dateString);
-  if (Number.isNaN(birthDate.getTime())) {
-    throw new Error("올바른 생년월일을 입력하세요.");
-  }
+  const { year, month, day } = dateString;
+  const birthDate = new Date(year, month - 1, day);
 
   const now = new Date();
   birthDate.setHours(0, 0, 0, 0);
@@ -96,6 +127,92 @@ function calculateBiorhythm(dateString) {
   const overall = Math.round(physical * 0.4 + emotional * 0.35 + intellectual * 0.25);
 
   return { days, physical, emotional, intellectual, overall };
+}
+
+function normalizeBirthDateInput(raw) {
+  const digits = String(raw || "").replace(/\D/g, "");
+  if (digits.length !== 8) {
+    throw new Error("생년월일 8자리를 입력하세요. (예: 19940321)");
+  }
+
+  const year = Number(digits.slice(0, 4));
+  const month = Number(digits.slice(4, 6));
+  const day = Number(digits.slice(6, 8));
+  const candidate = new Date(year, month - 1, day);
+  const now = new Date();
+
+  if (
+    !Number.isInteger(year)
+    || !Number.isInteger(month)
+    || !Number.isInteger(day)
+    || year < 1900
+    || year > now.getFullYear()
+    || month < 1
+    || month > 12
+    || day < 1
+    || day > 31
+    || Number.isNaN(candidate.getTime())
+    || candidate.getFullYear() !== year
+    || candidate.getMonth() !== month - 1
+    || candidate.getDate() !== day
+  ) {
+    throw new Error("유효한 생년월일을 입력하세요.");
+  }
+
+  return {
+    year,
+    month,
+    day,
+    compact: digits,
+    iso: `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+  };
+}
+
+function formatBirthInput(raw) {
+  const digits = String(raw || "").replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+}
+
+function buildBioProfile(birthDate, rhythm) {
+  const lucky = new Set();
+  const firstTwo = Number(birthDate.compact.slice(0, 2));
+  const lastTwo = Number(birthDate.compact.slice(2, 4));
+  const digitsSum = birthDate.compact.split("").reduce((acc, d) => acc + Number(d), 0);
+
+  [
+    birthDate.day,
+    birthDate.month,
+    (birthDate.year % 45) || 45,
+    (firstTwo % 45) || 45,
+    (lastTwo % 45) || 45,
+    (digitsSum % 45) || 45,
+    ((rhythm.physical + rhythm.emotional + rhythm.intellectual) % 45) || 45,
+    ((rhythm.overall + birthDate.day + birthDate.month) % 45) || 45,
+  ].forEach((n) => {
+    if (n >= 1 && n <= 45) lucky.add(n);
+  });
+
+  return {
+    lowWeight: 0.75 + rhythm.physical / 100,
+    midWeight: 0.75 + rhythm.emotional / 100,
+    highWeight: 0.75 + rhythm.intellectual / 100,
+    oddWeight: rhythm.overall >= 50 ? 1.18 : 0.94,
+    evenWeight: rhythm.overall < 50 ? 1.18 : 0.94,
+    luckyNumbers: [...lucky].sort((a, b) => a - b),
+  };
+}
+
+function getBioNumberWeight(number, profile) {
+  const rangeWeight = number <= 15
+    ? profile.lowWeight
+    : number <= 30
+      ? profile.midWeight
+      : profile.highWeight;
+  const parityWeight = number % 2 === 0 ? profile.evenWeight : profile.oddWeight;
+  const luckyWeight = profile.luckyNumbers.includes(number) ? 1.45 : 1;
+  return rangeWeight * parityWeight * luckyWeight;
 }
 
 function calculateSetQuality(numbers) {
@@ -222,7 +339,11 @@ function generateOneSet(mode, selectedNumbers) {
   if (need < 0) throw new Error("포함 번호는 최대 6개입니다.");
   if (pool.length < need) throw new Error("제외 번호가 너무 많아 조합을 만들 수 없습니다.");
 
-  return [...includeNumbers, ...pickRandom(pool, need)].sort((a, b) => a - b);
+  const picked = currentBioProfile
+    ? pickWeightedUnique(pool, need, (n) => getBioNumberWeight(n, currentBioProfile))
+    : pickRandom(pool, need);
+
+  return [...includeNumbers, ...picked].sort((a, b) => a - b);
 }
 
 function renderGeneratedSets() {
@@ -260,7 +381,8 @@ function renderGeneratedSets() {
       generatedList.appendChild(li);
     }
 
-    generatorMessage.textContent = `생성 완료: 방식=${mode}, 선택=${selectedNumbers.length}개`;
+    const bioMode = currentBioProfile ? " · 바이오리듬 연동 ON" : "";
+    generatorMessage.textContent = `생성 완료: 방식=${mode}, 선택=${selectedNumbers.length}개${bioMode}`;
   } catch (error) {
     generatorMessage.textContent = `생성 실패: ${error.message}`;
   }
@@ -429,8 +551,12 @@ function handleCalculateBiorhythm() {
     if (!birthDateInput.value) {
       throw new Error("생년월일을 먼저 입력하세요.");
     }
-    const result = calculateBiorhythm(birthDateInput.value);
+    const birthDate = normalizeBirthDateInput(birthDateInput.value);
+    birthDateInput.value = formatBirthInput(birthDate.compact);
+    const result = calculateBiorhythm(birthDate);
+    const bioProfile = buildBioProfile(birthDate, result);
     currentBioScore = result.overall;
+    currentBioProfile = bioProfile;
     biorhythmResult.innerHTML = `
       <strong>오늘의 바이오리듬 종합 점수: ${result.overall}점</strong>
       <div class="bio-grid">
@@ -439,10 +565,12 @@ function handleCalculateBiorhythm() {
         <div class="bio-item"><strong>지성 리듬</strong><span>${result.intellectual}점</span></div>
         <div class="bio-item"><strong>로또 구매 적합도</strong><span>${result.overall}점</span></div>
       </div>
-      <p class="bio-note">번호 생성 시 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
+      <p class="bio-note">연동 번호: ${bioProfile.luckyNumbers.join(", ") || "없음"}</p>
+      <p class="bio-note">번호 생성 시 바이오리듬 가중치로 숫자 풀을 먼저 선별하고, 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
     `;
   } catch (error) {
     currentBioScore = null;
+    currentBioProfile = null;
     biorhythmResult.textContent = `계산 실패: ${error.message}`;
   }
 }
@@ -498,6 +626,9 @@ checkDrawBtn.addEventListener("click", handleCheckDraw);
 loadLatestBtn.addEventListener("click", handleLoadLatest);
 storeSearchBtn.addEventListener("click", handleStoreSearch);
 calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
+birthDateInput.addEventListener("input", () => {
+  birthDateInput.value = formatBirthInput(birthDateInput.value);
+});
 
 buildModePicker();
 updateModeUI();

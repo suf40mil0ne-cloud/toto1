@@ -231,6 +231,12 @@ a {
   font-size: 0.88rem;
 }
 
+.input-hint {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
 .faq-list {
   display: grid;
   gap: 10px;
