@@ -189,7 +189,8 @@ function buildBioProfile(birthDate, rhythm, strength = "medium") {
   const lastTwo = Number(birthDate.compact.slice(2, 4));
   const digitsSum = birthDate.compact.split("").reduce((acc, d) => acc + Number(d), 0);
 
-  [
+  // 후보 번호 생성
+  const candidates = [
     birthDate.day,
     birthDate.month,
     (birthDate.year % 45) || 45,
@@ -198,9 +199,17 @@ function buildBioProfile(birthDate, rhythm, strength = "medium") {
     (digitsSum % 45) || 45,
     ((rhythm.physical + rhythm.emotional + rhythm.intellectual) % 45) || 45,
     ((rhythm.overall + birthDate.day + birthDate.month) % 45) || 45,
-  ].forEach((n) => {
-    if (n >= 1 && n <= 45) lucky.add(n);
+  ];
+
+  // 정확히 6개가 될 때까지 유효한 번호 추가
+  candidates.forEach((n) => {
+    if (lucky.size < 6 && n >= 1 && n <= 45) lucky.add(n);
   });
+
+  // 부족하면 랜덤으로 채움
+  while (lucky.size < 6) {
+    lucky.add(Math.floor(Math.random() * 45) + 1);
+  }
 
   const factor = strength === "weak" ? 0.5 : strength === "strong" ? 1.5 : 1.0;
 
@@ -575,6 +584,7 @@ function handleCalculateBiorhythm() {
     const bioProfile = buildBioProfile(birthDate, result, strength);
     currentBioScore = result.overall;
     currentBioProfile = bioProfile;
+
     biorhythmResult.innerHTML = `
       <strong>오늘의 바이오리듬 종합 점수: ${result.overall}점</strong>
       <div class="bio-grid">
@@ -584,9 +594,17 @@ function handleCalculateBiorhythm() {
         <div class="bio-item"><strong>로또 구매 적합도</strong><span>${result.overall}점</span></div>
       </div>
       <p class="bio-note">연동 강도: ${strength === "weak" ? "약" : strength === "strong" ? "강" : "중"}</p>
-      <p class="bio-note">연동 번호: ${bioProfile.luckyNumbers.join(", ") || "없음"}</p>
+      <div class="bio-lucky-wrap" style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e9eef5;">
+        <p style="margin: 0 0 8px; font-weight: 700; font-size: 0.9rem;">연동 추천 번호 (6개)</p>
+        <div id="bio-lucky-balls" class="number-set mini-balls" style="border: none; background: none; padding: 0;"></div>
+      </div>
       <p class="bio-note">번호 생성 시 바이오리듬 가중치로 숫자 풀을 먼저 선별하고, 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
     `;
+
+    const luckyBallsContainer = biorhythmResult.querySelector("#bio-lucky-balls");
+    bioProfile.luckyNumbers.forEach((num) => {
+      luckyBallsContainer.appendChild(createBall(num));
+    });
   } catch (error) {
     currentBioScore = null;
     currentBioProfile = null;
