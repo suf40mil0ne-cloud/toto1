@@ -16,8 +16,8 @@
     <nav>
       <a href="#biorhythm-card">바이오 분석</a>
       <a href="#generator-card">리듬 생성기</a>
-      <a href="#draw-card">당첨조회</a>
-      <a href="/guides.html">연동원리</a>
+      <a href="#draw-card">당첨데이터</a>
+      <a href="#store-card">당첨판매점</a>
     </nav>
   </header>
 
@@ -28,8 +28,13 @@
     <section class="hero theme-focus">
       <p class="kicker">BIO-ALGORITHM SYSTEM</p>
       <h1>당신의 리듬이<br /><span class="highlight">행운의 번호</span>가 됩니다</h1>
-      <p class="hero-desc">단순한 랜덤이 아닙니다. 생년월일 기반의 고유한 바이오리듬 파동을 분석하여 최적의 번호 가중치를 계산합니다.</p>
       
+      <div class="jackpot-panel">
+        <p class="jackpot-label">직전회차 1등 예상 실수령액</p>
+        <p id="latest-net-amount" class="jackpot-amount">데이터 로딩 중...</p>
+        <p id="latest-jackpot-meta" class="jackpot-meta">최신 데이터를 불러오고 있습니다.</p>
+      </div>
+
       <div class="logic-infographic">
         <div class="logic-step">
           <span class="icon">📅</span>
@@ -60,7 +65,7 @@
       <div class="controls row-wrap">
         <label for="birth-date-simple">생년월일</label>
         <input type="text" id="birth-date-simple" inputmode="numeric" placeholder="예: 19940321" maxlength="10" />
-        <button id="calc-bio-btn" type="button">리듬 분석하기</button>
+        <button id="calc-bio-btn" type="button" class="btn-primary">리듬 분석하기</button>
       </div>
       <div class="controls row-wrap" style="margin-top: 8px;">
         <label>연동 가중치 강도</label>
@@ -78,7 +83,7 @@
         <h2>2. 리듬 연동 번호 생성</h2>
         <span class="badge">STEP 02</span>
       </div>
-      <p class="section-desc">분석된 리듬 가중치를 적용하여 행운의 번호를 추출합니다.</p>
+      <p class="section-desc">분석된 리듬 가중치를 반영한 6개 번호 조합을 추출합니다.</p>
       <div class="controls row-wrap">
         <label>생성 세트 수
           <select id="set-count">
@@ -88,12 +93,36 @@
             <option value="10">10세트</option>
           </select>
         </label>
-        <select id="generator-mode" style="display:none;"><option value="random">리듬기반</option></select>
-        <button id="generate-btn" class="btn-primary">번호 생성 (리듬 반영)</button>
+        <button id="generate-btn" class="btn-primary" style="background: var(--brand-2);">리듬 기반 번호 생성</button>
         <button id="reset-options-btn" type="button" class="btn-outline">초기화</button>
       </div>
       <p id="generator-message" class="updated-note">먼저 리듬 분석을 완료하면 가중치가 자동으로 적용됩니다.</p>
       <ul id="generated-list" class="number-list"></ul>
+    </section>
+
+    <section class="card" id="draw-card">
+      <div class="card-header">
+        <h2>지난 회차 당첨번호 조회</h2>
+      </div>
+      <div class="controls row-wrap">
+        <button id="load-latest-btn" class="btn-small">최신 회차 불러오기</button>
+        <label for="draw-no">회차 번호</label>
+        <input type="number" id="draw-no" min="1" placeholder="예: 1150" />
+        <button id="check-draw-btn">조회</button>
+      </div>
+      <div id="draw-result" class="result-box">회차를 입력해 당첨 결과를 확인하세요.</div>
+    </section>
+
+    <section class="card" id="store-card">
+      <div class="card-header">
+        <h2>1등 당첨판매점 조회</h2>
+      </div>
+      <div class="controls row-wrap">
+        <label for="store-draw-no">회차 번호</label>
+        <input type="number" id="store-draw-no" min="1" placeholder="예: 1150" />
+        <button id="store-search-btn">판매점 조회</button>
+      </div>
+      <div id="store-result" class="result-box">회차별 1등 배출 명당을 확인하세요.</div>
     </section>
 
     <section class="card" id="how-it-works">
@@ -101,31 +130,21 @@
       <div class="how-grid">
         <div class="how-item">
           <div class="how-head p">신체 리듬</div>
-          <p><strong>저번호(1~15)</strong> 구간의 출현 빈도를 조절합니다. 에너지가 높을수록 낮은 번호의 역동성을 반영합니다.</p>
+          <p><strong>저번호(1~15)</strong> 구간 가중치 결정</p>
         </div>
         <div class="how-item">
           <div class="how-head e">감성 리듬</div>
-          <p><strong>중간번호(16~30)</strong> 구간에 영향을 줍니다. 심리적 균형에 따른 안정적인 중심 번호를 매칭합니다.</p>
+          <p><strong>중간번호(16~30)</strong> 구간 가중치 결정</p>
         </div>
         <div class="how-item">
           <div class="how-head i">지성 리듬</div>
-          <p><strong>고번호(31~45)</strong> 구간의 가중치를 결정합니다. 분석적 흐름에 따라 상위 구간 번호를 선택합니다.</p>
+          <p><strong>고번호(31~45)</strong> 구간 가중치 결정</p>
         </div>
         <div class="how-item">
           <div class="how-head o">종합 지수</div>
-          <p><strong>홀짝 비율 및 구매 점수</strong>를 결정합니다. 전반적인 행운 에너지가 세트별 품질 점수에 반영됩니다.</p>
+          <p><strong>적합도 점수</strong> 산출 반영</p>
         </div>
       </div>
-    </section>
-
-    <section class="card" id="draw-card">
-      <h2>당첨 데이터 조회</h2>
-      <div class="controls row-wrap">
-        <button id="load-latest-btn" class="btn-small">최신 회차</button>
-        <input type="number" id="draw-no" placeholder="회차 입력" style="width: 100px;" />
-        <button id="check-draw-btn">조회</button>
-      </div>
-      <div id="draw-result" class="result-box"></div>
     </section>
 
     <section class="info-grid">
@@ -135,7 +154,7 @@
       </article>
       <article class="info-card">
         <h3>면책 안내</h3>
-        <p>바이오리듬 알고리즘은 재미와 참고용이며 당첨을 보장하지 않습니다.</p>
+        <p>로또리듬의 알고리즘은 재미와 참고용이며 당첨을 보장하지 않습니다.</p>
       </article>
     </section>
   </main>
