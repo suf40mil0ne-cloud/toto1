@@ -24,12 +24,20 @@ const storeSearchBtn = document.querySelector("#store-search-btn");
 const storeResult = document.querySelector("#store-result");
 const birthDateInput = document.querySelector("#birth-date-simple");
 const calcBioBtn = document.querySelector("#calc-bio-btn");
+// ... (previous constants)
 const biorhythmResult = document.querySelector("#biorhythm-result");
 
 const API_DRAW = "/api/draw";
 const API_STORES = "/api/stores";
 
+// 페이지 새로고침 시 맨 위로 이동
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+window.scrollTo(0, 0);
+
 const pickedNumbers = new Set();
+// ... (rest of the code)
 let cachedLatestDrawNumbers = [];
 let currentBioScore = null;
 let currentBioProfile = null;
