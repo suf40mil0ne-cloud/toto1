@@ -21,7 +21,10 @@
       enable = true;
       previews = {
         web = {
-          command = ["python3" "-m" "http.server" "$PORT" "--bind" "0.0.0.0"];
+          command = ["node" "dev-server.js"];
+          env = {
+            PORT = "$PORT";
+          };
           manager = "web";
         };
       };
