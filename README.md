@@ -23,7 +23,7 @@ Cloudflare Pages 기반 로또 정보 사이트입니다.
 - `ads.txt`
   - `pub-xxxxxxxxxxxxxxxx` -> 본인 AdSense Publisher ID
 - `contact.html`
-  - `contact@example.com` -> 실제 문의 이메일
+  - `suf40mil0ne@gmail.com` -> 실제 문의 이메일
 - `robots.txt`, `sitemap.xml`
   - `https://example.com` -> 실제 도메인
 
