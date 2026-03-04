@@ -586,12 +586,24 @@ function handleCalculateBiorhythm() {
     currentBioProfile = bioProfile;
 
     biorhythmResult.innerHTML = `
-      <strong>오늘의 바이오리듬 종합 점수: ${result.overall}점</strong>
+      <strong>오늘의 바이오리듬 분석 결과</strong>
       <div class="bio-grid">
-        <div class="bio-item"><strong>신체 리듬</strong><span>${result.physical}점</span></div>
-        <div class="bio-item"><strong>감성 리듬</strong><span>${result.emotional}점</span></div>
-        <div class="bio-item"><strong>지성 리듬</strong><span>${result.intellectual}점</span></div>
-        <div class="bio-item"><strong>로또 구매 적합도</strong><span>${result.overall}점</span></div>
+        <div class="bio-item">
+          <strong>신체 리듬 (${result.physical}점)</strong>
+          <div class="bio-bar-bg"><div class="bio-bar-fill physical" style="width: ${result.physical}%"></div></div>
+        </div>
+        <div class="bio-item">
+          <strong>감성 리듬 (${result.emotional}점)</strong>
+          <div class="bio-bar-bg"><div class="bio-bar-fill emotional" style="width: ${result.emotional}%"></div></div>
+        </div>
+        <div class="bio-item">
+          <strong>지성 리듬 (${result.intellectual}점)</strong>
+          <div class="bio-bar-bg"><div class="bio-bar-fill intellectual" style="width: ${result.intellectual}%"></div></div>
+        </div>
+        <div class="bio-item">
+          <strong>구매 적합도 (${result.overall}점)</strong>
+          <div class="bio-bar-bg"><div class="bio-bar-fill overall" style="width: ${result.overall}%"></div></div>
+        </div>
       </div>
       <p class="bio-note">연동 강도: ${strength === "weak" ? "약" : strength === "strong" ? "강" : "중"}</p>
       <div class="bio-lucky-wrap" style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e9eef5;">
