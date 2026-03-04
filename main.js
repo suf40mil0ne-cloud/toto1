@@ -175,7 +175,7 @@ function formatBirthInput(raw) {
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
 }
 
-function buildBioProfile(birthDate, rhythm) {
+function buildBioProfile(birthDate, rhythm, strength = "medium") {
   const lucky = new Set();
   const firstTwo = Number(birthDate.compact.slice(0, 2));
   const lastTwo = Number(birthDate.compact.slice(2, 4));
@@ -194,13 +194,19 @@ function buildBioProfile(birthDate, rhythm) {
     if (n >= 1 && n <= 45) lucky.add(n);
   });
 
+  const factor = strength === "weak" ? 0.5 : strength === "strong" ? 1.5 : 1.0;
+
+  // 기본 가중치 편차를 강도(factor)에 따라 조절
+  const adjust = (val) => 1 + (val - 1) * factor;
+
   return {
-    lowWeight: 0.75 + rhythm.physical / 100,
-    midWeight: 0.75 + rhythm.emotional / 100,
-    highWeight: 0.75 + rhythm.intellectual / 100,
-    oddWeight: rhythm.overall >= 50 ? 1.18 : 0.94,
-    evenWeight: rhythm.overall < 50 ? 1.18 : 0.94,
+    lowWeight: adjust(0.75 + rhythm.physical / 100),
+    midWeight: adjust(0.75 + rhythm.emotional / 100),
+    highWeight: adjust(0.75 + rhythm.intellectual / 100),
+    oddWeight: adjust(rhythm.overall >= 50 ? 1.18 : 0.94),
+    evenWeight: adjust(rhythm.overall < 50 ? 1.18 : 0.94),
     luckyNumbers: [...lucky].sort((a, b) => a - b),
+    luckyWeight: adjust(1.45),
   };
 }
 
@@ -211,7 +217,7 @@ function getBioNumberWeight(number, profile) {
       ? profile.midWeight
       : profile.highWeight;
   const parityWeight = number % 2 === 0 ? profile.evenWeight : profile.oddWeight;
-  const luckyWeight = profile.luckyNumbers.includes(number) ? 1.45 : 1;
+  const luckyWeight = profile.luckyNumbers.includes(number) ? profile.luckyWeight : 1;
   return rangeWeight * parityWeight * luckyWeight;
 }
 
@@ -554,7 +560,11 @@ function handleCalculateBiorhythm() {
     const birthDate = normalizeBirthDateInput(birthDateInput.value);
     birthDateInput.value = formatBirthInput(birthDate.compact);
     const result = calculateBiorhythm(birthDate);
-    const bioProfile = buildBioProfile(birthDate, result);
+
+    const strengthEl = document.querySelector('input[name="bio-strength"]:checked');
+    const strength = strengthEl ? strengthEl.value : "medium";
+
+    const bioProfile = buildBioProfile(birthDate, result, strength);
     currentBioScore = result.overall;
     currentBioProfile = bioProfile;
     biorhythmResult.innerHTML = `
@@ -565,6 +575,7 @@ function handleCalculateBiorhythm() {
         <div class="bio-item"><strong>지성 리듬</strong><span>${result.intellectual}점</span></div>
         <div class="bio-item"><strong>로또 구매 적합도</strong><span>${result.overall}점</span></div>
       </div>
+      <p class="bio-note">연동 강도: ${strength === "weak" ? "약" : strength === "strong" ? "강" : "중"}</p>
       <p class="bio-note">연동 번호: ${bioProfile.luckyNumbers.join(", ") || "없음"}</p>
       <p class="bio-note">번호 생성 시 바이오리듬 가중치로 숫자 풀을 먼저 선별하고, 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
     `;

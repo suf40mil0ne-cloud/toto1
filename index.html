@@ -108,6 +108,14 @@
         <input type="text" id="birth-date-simple" inputmode="numeric" autocomplete="bday" placeholder="예: 19940321" maxlength="10" />
         <button id="calc-bio-btn" type="button">바이오리듬 계산</button>
       </div>
+      <div class="controls row-wrap" style="margin-top: 8px;">
+        <label>연동 강도</label>
+        <div class="radio-group">
+          <label><input type="radio" name="bio-strength" value="weak"> 약</label>
+          <label><input type="radio" name="bio-strength" value="medium" checked> 중</label>
+          <label><input type="radio" name="bio-strength" value="strong"> 강</label>
+        </div>
+      </div>
       <p class="input-hint">숫자 8자리만 입력하면 자동으로 YYYY-MM-DD 형식으로 정리됩니다.</p>
       <div id="biorhythm-result" class="result-box">생년월일을 입력해 점수를 계산하세요.</div>
     </section>
