@@ -181,50 +181,6 @@ function formatBirthInput(raw) {
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
 }
 
-function buildBioProfile(birthDate, rhythm, strength = "medium") {
-  const lucky = new Set();
-  const firstTwo = Number(birthDate.compact.slice(0, 2));
-  const lastTwo = Number(birthDate.compact.slice(2, 4));
-  const digitsSum = birthDate.compact.split("").reduce((acc, d) => acc + Number(d), 0);
-
-  // 후보 번호 생성
-  const candidates = [
-    birthDate.day,
-    birthDate.month,
-    (birthDate.year % 45) || 45,
-    (firstTwo % 45) || 45,
-    (lastTwo % 45) || 45,
-    (digitsSum % 45) || 45,
-    ((rhythm.physical + rhythm.emotional + rhythm.intellectual) % 45) || 45,
-    ((rhythm.overall + birthDate.day + birthDate.month) % 45) || 45,
-  ];
-
-  // 정확히 6개가 될 때까지 유효한 번호 추가
-  candidates.forEach((n) => {
-    if (lucky.size < 6 && n >= 1 && n <= 45) lucky.add(n);
-  });
-
-  // 부족하면 랜덤으로 채움
-  while (lucky.size < 6) {
-    lucky.add(Math.floor(Math.random() * 45) + 1);
-  }
-
-  const factor = strength === "weak" ? 0.5 : strength === "strong" ? 1.5 : 1.0;
-
-  // 기본 가중치 편차를 강도(factor)에 따라 조절
-  const adjust = (val) => 1 + (val - 1) * factor;
-
-  return {
-    lowWeight: adjust(0.75 + rhythm.physical / 100),
-    midWeight: adjust(0.75 + rhythm.emotional / 100),
-    highWeight: adjust(0.75 + rhythm.intellectual / 100),
-    oddWeight: adjust(rhythm.overall >= 50 ? 1.18 : 0.94),
-    evenWeight: adjust(rhythm.overall < 50 ? 1.18 : 0.94),
-    luckyNumbers: [...lucky].sort((a, b) => a - b),
-    luckyWeight: adjust(1.45),
-  };
-}
-
 function getBioNumberWeight(number, profile) {
   const rangeWeight = number <= 15
     ? profile.lowWeight
@@ -234,6 +190,31 @@ function getBioNumberWeight(number, profile) {
   const parityWeight = number % 2 === 0 ? profile.evenWeight : profile.oddWeight;
   const luckyWeight = profile.luckyNumbers.includes(number) ? profile.luckyWeight : 1;
   return rangeWeight * parityWeight * luckyWeight;
+}
+
+function buildBioProfile(birthDate, rhythm, strength = "medium") {
+  // 강도에 따른 보정 계수 (편차 극대화)
+  const factor = strength === "weak" ? 0.3 : strength === "strong" ? 3.0 : 1.0;
+  const adjust = (val) => 1 + (val - 1) * factor;
+
+  // 1. 기본 리듬 가중치 계산
+  const baseProfile = {
+    lowWeight: adjust(0.75 + rhythm.physical / 100),
+    midWeight: adjust(0.75 + rhythm.emotional / 100),
+    highWeight: adjust(0.75 + rhythm.intellectual / 100),
+    oddWeight: adjust(rhythm.overall >= 50 ? 1.2 : 0.85),
+    evenWeight: adjust(rhythm.overall < 50 ? 1.2 : 0.85),
+    luckyNumbers: [], // 아래에서 채움
+    luckyWeight: adjust(1.5),
+  };
+
+  // 2. 이 가중치를 바탕으로 1~45 풀에서 추천 번호 6개를 '추출'
+  const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+  const pickedLucky = pickWeightedUnique(pool, 6, (n) => getBioNumberWeight(n, baseProfile));
+  
+  baseProfile.luckyNumbers = pickedLucky.sort((a, b) => a - b);
+  
+  return baseProfile;
 }
 
 function drawBiorhythmChart(canvas, days) {
@@ -739,6 +720,15 @@ storeSearchBtn.addEventListener("click", handleStoreSearch);
 calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
 birthDateInput.addEventListener("input", () => {
   birthDateInput.value = formatBirthInput(birthDateInput.value);
+});
+
+// 연동 강도 변경 시 즉시 다시 계산하여 번호 변화 보여주기
+document.querySelectorAll('input[name="bio-strength"]').forEach((radio) => {
+  radio.addEventListener("change", () => {
+    if (birthDateInput.value.replace(/\D/g, "").length === 8) {
+      handleCalculateBiorhythm();
+    }
+  });
 });
 
 buildModePicker();
