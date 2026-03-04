@@ -2,32 +2,18 @@ const generatedList = document.querySelector("#generated-list");
 const setCountSelect = document.querySelector("#set-count");
 const modeSelect = document.querySelector("#generator-mode");
 const modeHelp = document.querySelector("#mode-help");
-const modePickerWrap = document.querySelector("#mode-picker-wrap");
-const modePickerTitle = document.querySelector("#mode-picker-title");
-const modePickedSummary = document.querySelector("#mode-picked-summary");
-const clearModePickedBtn = document.querySelector("#clear-mode-picked-btn");
-const autoLastDrawBtn = document.querySelector("#auto-last-draw-btn");
-const generateBtn = document.querySelector("#generate-btn");
-const resetOptionsBtn = document.querySelector("#reset-options-btn");
 const generatorMessage = document.querySelector("#generator-message");
-const modePicker = document.querySelector("#mode-picker");
 
 const drawInput = document.querySelector("#draw-no");
 const checkDrawBtn = document.querySelector("#check-draw-btn");
 const loadLatestBtn = document.querySelector("#load-latest-btn");
 const drawResult = document.querySelector("#draw-result");
-const latestNetAmount = document.querySelector("#latest-net-amount");
-const latestJackpotMeta = document.querySelector("#latest-jackpot-meta");
 
-const storeInput = document.querySelector("#store-draw-no");
-const storeSearchBtn = document.querySelector("#store-search-btn");
-const storeResult = document.querySelector("#store-result");
 const birthDateInput = document.querySelector("#birth-date-simple");
 const calcBioBtn = document.querySelector("#calc-bio-btn");
 const biorhythmResult = document.querySelector("#biorhythm-result");
 
 const API_DRAW = "/api/draw";
-const API_STORES = "/api/stores";
 
 // 페이지 새로고침 시 맨 위로 이동
 if ("scrollRestoration" in history) {
@@ -36,7 +22,6 @@ if ("scrollRestoration" in history) {
 window.scrollTo(0, 0);
 
 const pickedNumbers = new Set();
-let cachedLatestDrawNumbers = [];
 let currentBioScore = null;
 let currentBioProfile = null;
 
@@ -48,10 +33,6 @@ function shuffle(array) {
   return array;
 }
 
-function pickRandom(array, count) {
-  return shuffle([...array]).slice(0, count);
-}
-
 function pickWeightedUnique(pool, count, getWeight) {
   const source = [...pool];
   const picked = [];
@@ -59,23 +40,19 @@ function pickWeightedUnique(pool, count, getWeight) {
   for (let i = 0; i < count; i += 1) {
     if (!source.length) break;
 
-    const weights = source.map((n) => Math.max(0, Number(getWeight(n)) || 0));
+    const weights = source.map((n) => Math.max(0.01, Number(getWeight(n)) || 0));
     const total = weights.reduce((acc, v) => acc + v, 0);
     let selectedIndex = -1;
 
-    if (total <= 0) {
-      selectedIndex = Math.floor(Math.random() * source.length);
-    } else {
-      let threshold = Math.random() * total;
-      for (let j = 0; j < source.length; j += 1) {
-        threshold -= weights[j];
-        if (threshold <= 0) {
-          selectedIndex = j;
-          break;
-        }
+    let threshold = Math.random() * total;
+    for (let j = 0; j < source.length; j += 1) {
+      threshold -= weights[j];
+      if (threshold <= 0) {
+        selectedIndex = j;
+        break;
       }
-      if (selectedIndex < 0) selectedIndex = source.length - 1;
     }
+    if (selectedIndex < 0) selectedIndex = source.length - 1;
 
     picked.push(source[selectedIndex]);
     source.splice(selectedIndex, 1);
@@ -84,16 +61,12 @@ function pickWeightedUnique(pool, count, getWeight) {
   return picked;
 }
 
-function toSortedArray(setObj) {
-  return Array.from(setObj).sort((a, b) => a - b);
-}
-
 function ballColor(number) {
-  if (number <= 10) return "#f4b400";
-  if (number <= 20) return "#2d9cdb";
-  if (number <= 30) return "#eb5757";
-  if (number <= 40) return "#646c7a";
-  return "#27ae60";
+  if (number <= 10) return "#f59e0b"; // Yellow
+  if (number <= 20) return "#3b82f6"; // Blue
+  if (number <= 30) return "#ef4444"; // Red
+  if (number <= 40) return "#64748b"; // Gray
+  return "#10b981"; // Green
 }
 
 function createBall(number) {
@@ -104,32 +77,20 @@ function createBall(number) {
   return span;
 }
 
-function calculateTakeHomeAmount(gross) {
-  const amount = Number(gross);
-  if (!Number.isFinite(amount) || amount <= 0) return 0;
-  if (amount <= 3_000_000) return amount;
-  if (amount <= 300_000_000) return Math.floor(amount * 0.78);
-  return Math.floor(300_000_000 * 0.78 + (amount - 300_000_000) * 0.67);
-}
-
 function calculateBiorhythm(dateString) {
   const { year, month, day } = dateString;
   const birthDate = new Date(year, month - 1, day);
-
   const now = new Date();
   birthDate.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
   const days = Math.floor((now.getTime() - birthDate.getTime()) / (24 * 60 * 60 * 1000));
-  if (days < 0) {
-    throw new Error("미래 날짜는 입력할 수 없습니다.");
-  }
+  if (days < 0) throw new Error("미래 날짜는 입력할 수 없습니다.");
 
   const cycleValue = (period, offset = 0) => Math.sin((2 * Math.PI * (days + offset)) / period);
-  const toScore = (raw) => Math.round((raw + 1) * 50);
-
-  const physical = toScore(cycleValue(23));
-  const emotional = toScore(cycleValue(28));
-  const intellectual = toScore(cycleValue(33));
+  
+  const physical = Math.round((cycleValue(23) + 1) * 50);
+  const emotional = Math.round((cycleValue(28) + 1) * 50);
+  const intellectual = Math.round((cycleValue(33) + 1) * 50);
   const overall = Math.round(physical * 0.4 + emotional * 0.35 + intellectual * 0.25);
 
   return { days, physical, emotional, intellectual, overall };
@@ -137,605 +98,215 @@ function calculateBiorhythm(dateString) {
 
 function normalizeBirthDateInput(raw) {
   const digits = String(raw || "").replace(/\D/g, "");
-  if (digits.length !== 8) {
-    throw new Error("생년월일 8자리를 입력하세요. (예: 19940321)");
-  }
-
+  if (digits.length !== 8) throw new Error("생년월일 8자리를 입력하세요.");
   const year = Number(digits.slice(0, 4));
   const month = Number(digits.slice(4, 6));
   const day = Number(digits.slice(6, 8));
   const candidate = new Date(year, month - 1, day);
-  const now = new Date();
-
-  if (
-    !Number.isInteger(year)
-    || !Number.isInteger(month)
-    || !Number.isInteger(day)
-    || year < 1900
-    || year > now.getFullYear()
-    || month < 1
-    || month > 12
-    || day < 1
-    || day > 31
-    || Number.isNaN(candidate.getTime())
-    || candidate.getFullYear() !== year
-    || candidate.getMonth() !== month - 1
-    || candidate.getDate() !== day
-  ) {
-    throw new Error("유효한 생년월일을 입력하세요.");
+  if (candidate.getFullYear() !== year || candidate.getMonth() !== month - 1 || candidate.getDate() !== day) {
+    throw new Error("유효한 날짜가 아닙니다.");
   }
-
-  return {
-    year,
-    month,
-    day,
-    compact: digits,
-    iso: `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-  };
-}
-
-function formatBirthInput(raw) {
-  const digits = String(raw || "").replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 4) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
-}
-
-function getBioNumberWeight(number, profile) {
-  const rangeWeight = number <= 15
-    ? profile.lowWeight
-    : number <= 30
-      ? profile.midWeight
-      : profile.highWeight;
-  const parityWeight = number % 2 === 0 ? profile.evenWeight : profile.oddWeight;
-  const luckyWeight = profile.luckyNumbers.includes(number) ? profile.luckyWeight : 1;
-  return rangeWeight * parityWeight * luckyWeight;
+  return { year, month, day, compact: digits };
 }
 
 function buildBioProfile(birthDate, rhythm, strength = "medium") {
-  // 강도에 따른 보정 계수 (편차 극대화)
-  const factor = strength === "weak" ? 0.3 : strength === "strong" ? 3.0 : 1.0;
+  const factor = strength === "weak" ? 0.3 : strength === "strong" ? 4.0 : 1.0;
   const adjust = (val) => 1 + (val - 1) * factor;
 
-  // 1. 기본 리듬 가중치 계산
-  const baseProfile = {
-    lowWeight: adjust(0.75 + rhythm.physical / 100),
-    midWeight: adjust(0.75 + rhythm.emotional / 100),
-    highWeight: adjust(0.75 + rhythm.intellectual / 100),
-    oddWeight: adjust(rhythm.overall >= 50 ? 1.2 : 0.85),
-    evenWeight: adjust(rhythm.overall < 50 ? 1.2 : 0.85),
-    luckyNumbers: [], // 아래에서 채움
-    luckyWeight: adjust(1.5),
+  const profile = {
+    lowWeight: adjust(0.7 + rhythm.physical / 100),
+    midWeight: adjust(0.7 + rhythm.emotional / 100),
+    highWeight: adjust(0.7 + rhythm.intellectual / 100),
+    oddWeight: adjust(rhythm.overall >= 50 ? 1.2 : 0.8),
+    evenWeight: adjust(rhythm.overall < 50 ? 1.2 : 0.8),
+    luckyNumbers: [],
+    luckyWeight: adjust(1.6),
   };
 
-  // 2. 이 가중치를 바탕으로 1~45 풀에서 추천 번호 6개를 '추출'
   const pool = Array.from({ length: 45 }, (_, i) => i + 1);
-  const pickedLucky = pickWeightedUnique(pool, 6, (n) => getBioNumberWeight(n, baseProfile));
-  
-  baseProfile.luckyNumbers = pickedLucky.sort((a, b) => a - b);
-  
-  return baseProfile;
+  const getWeight = (n) => {
+    let w = n <= 15 ? profile.lowWeight : n <= 30 ? profile.midWeight : profile.highWeight;
+    w *= (n % 2 === 0 ? profile.evenWeight : profile.oddWeight);
+    return w;
+  };
+
+  profile.luckyNumbers = pickWeightedUnique(pool, 6, getWeight).sort((a, b) => a - b);
+  return profile;
 }
 
 function drawBiorhythmChart(canvas, days) {
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
-  const padding = 30;
-  const chartW = w - padding * 2;
-  const chartH = h - padding * 2;
+  const paddingX = 40;
+  const paddingY = 40;
+  const chartW = w - paddingX * 2;
+  const chartH = h - paddingY * 2;
   const centerY = h / 2;
 
   ctx.clearRect(0, 0, w, h);
 
-  // 그리드 (가로선)
-  ctx.strokeStyle = "#e2e8f0";
+  // 가로 가이드 라인
+  ctx.strokeStyle = "#f1f5f9";
   ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padding, centerY);
-  ctx.lineTo(w - padding, centerY);
-  ctx.stroke();
+  [0.25, 0.5, 0.75].forEach(p => {
+    const y = paddingY + chartH * p;
+    ctx.beginPath(); ctx.moveTo(paddingX, y); ctx.lineTo(w - paddingX, y); ctx.stroke();
+  });
 
-  // 중앙 오늘 선
-  ctx.strokeStyle = "#94a3b8";
-  ctx.setLineDash([5, 5]);
-  ctx.beginPath();
-  ctx.moveTo(w / 2, padding);
-  ctx.lineTo(w / 2, h - padding);
-  ctx.stroke();
+  // 오늘 날짜 배경 강조
+  ctx.fillStyle = "rgba(79, 70, 229, 0.05)";
+  ctx.fillRect(w / 2 - 20, paddingY, 40, chartH);
+
+  // 오늘 선
+  ctx.strokeStyle = "#4f46e5";
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(w / 2, paddingY); ctx.lineTo(w / 2, h - paddingY); ctx.stroke();
   ctx.setLineDash([]);
 
-  ctx.fillStyle = "#64748b";
-  ctx.font = "12px sans-serif";
-  ctx.fillText("오늘", w / 2 - 10, padding - 10);
-
-  const drawCycle = (period, color) => {
+  const drawWave = (period, color, label) => {
     ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = color + "66";
+    
     ctx.beginPath();
-    for (let x = 0; x <= chartW; x += 1) {
-      const offset = ((x / chartW) - 0.5) * 30; // -15일 ~ +15일
+    for (let x = 0; x <= chartW; x += 2) {
+      const offset = ((x / chartW) - 0.5) * 28; // 28일 범위
       const val = Math.sin((2 * Math.PI * (days + offset)) / period);
-      const y = centerY - val * (chartH / 2);
-      if (x === 0) ctx.moveTo(padding + x, y);
-      else ctx.lineTo(padding + x, y);
+      const y = centerY - val * (chartH / 2.2);
+      if (x === 0) ctx.moveTo(paddingX + x, y);
+      else ctx.lineTo(paddingX + x, y);
     }
     ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 끝점 라벨 생략 (범례 사용)
   };
 
-  drawCycle(23, "#f59e0b"); // 물리
-  drawCycle(28, "#ef4444"); // 감성
-  drawCycle(33, "#3b82f6"); // 지성
-}
-
-function calculateSetQuality(numbers) {
-  const oddCount = numbers.filter((n) => n % 2 === 1).length;
-  const sum = numbers.reduce((acc, n) => acc + n, 0);
-  const low = numbers.filter((n) => n <= 15).length;
-  const mid = numbers.filter((n) => n > 15 && n <= 30).length;
-  const high = numbers.filter((n) => n > 30).length;
-
-  const parityScore = Math.max(0, 100 - Math.abs(oddCount - 3) * 22);
-  const sumScore = Math.max(0, 100 - Math.abs(sum - 138));
-  const spreadPenalty = Math.abs(low - 2) + Math.abs(mid - 2) + Math.abs(high - 2);
-  const spreadScore = Math.max(0, 100 - spreadPenalty * 22);
-
-  return Math.round(parityScore * 0.34 + sumScore * 0.33 + spreadScore * 0.33);
-}
-
-function buildModePicker() {
-  modePicker.innerHTML = "";
-  for (let n = 1; n <= 45; n += 1) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "pick-btn";
-    btn.dataset.number = String(n);
-    btn.textContent = String(n);
-    modePicker.appendChild(btn);
-  }
-}
-
-function paintModePicker() {
-  document.querySelectorAll("#mode-picker .pick-btn").forEach((btn) => {
-    const number = Number(btn.dataset.number);
-    btn.classList.remove("active-include");
-    if (pickedNumbers.has(number)) {
-      btn.classList.add("active-include");
-    }
-  });
-}
-
-function syncModePickedSummary() {
-  const numbers = toSortedArray(pickedNumbers);
-  modePickedSummary.textContent = numbers.length ? numbers.join(", ") : "선택 없음";
-}
-
-function updateModeUI() {
-  const mode = modeSelect.value;
-
-  if (mode === "random") {
-    modeHelp.textContent = "완전 랜덤은 번호 선택 없이 생성합니다.";
-    modePickerTitle.textContent = "번호 선택 (사용 안 함)";
-    modePickerWrap.style.display = "none";
-    autoLastDrawBtn.style.display = "none";
-    return;
-  }
-
-  modePickerWrap.style.display = "block";
-  autoLastDrawBtn.style.display = "none";
-
-  if (mode === "include") {
-    modeHelp.textContent = "선택한 번호를 반드시 포함해 생성합니다. (최대 6개 선택)";
-    modePickerTitle.textContent = "포함할 번호 선택";
-    return;
-  }
-
-  if (mode === "exclude") {
-    modeHelp.textContent = "선택한 번호를 제외하고 생성합니다.";
-    modePickerTitle.textContent = "제외할 번호 선택";
-    return;
-  }
-
-  modeHelp.textContent = "직전회차 번호를 자동으로 불러와 제외합니다. 필요하면 직접 수정도 가능합니다.";
-  modePickerTitle.textContent = "직전회차 번호 선택 (정확히 6개)";
-  autoLastDrawBtn.style.display = "inline-flex";
-}
-
-function handleModePickerClick(event) {
-  const btn = event.target.closest(".pick-btn");
-  if (!btn) return;
-
-  const mode = modeSelect.value;
-  if (mode === "random") return;
-
-  const n = Number(btn.dataset.number);
-
-  if (pickedNumbers.has(n)) {
-    pickedNumbers.delete(n);
-  } else {
-    if (mode === "include" && pickedNumbers.size >= 6) {
-      generatorMessage.textContent = "선택 번호 포함 방식은 최대 6개까지만 선택할 수 있습니다.";
-      return;
-    }
-    if (mode === "exclude-last" && pickedNumbers.size >= 6) {
-      generatorMessage.textContent = "직전회차 제외 방식은 6개만 선택할 수 있습니다.";
-      return;
-    }
-    pickedNumbers.add(n);
-  }
-
-  paintModePicker();
-  syncModePickedSummary();
-}
-
-function generateOneSet(mode, selectedNumbers) {
-  const includeNumbers = mode === "include" ? selectedNumbers : [];
-  const excludedNumbers = mode === "exclude" || mode === "exclude-last" ? selectedNumbers : [];
-
-  const includeSet = new Set(includeNumbers);
-  const excludedSet = new Set(excludedNumbers);
-
-  includeNumbers.forEach((n) => {
-    if (excludedSet.has(n)) {
-      throw new Error(`번호 ${n}은(는) 동시에 포함/제외될 수 없습니다.`);
-    }
-  });
-
-  const pool = [];
-  for (let n = 1; n <= 45; n += 1) {
-    if (includeSet.has(n)) continue;
-    if (excludedSet.has(n)) continue;
-    pool.push(n);
-  }
-
-  const need = 6 - includeNumbers.length;
-  if (need < 0) throw new Error("포함 번호는 최대 6개입니다.");
-  if (pool.length < need) throw new Error("제외 번호가 너무 많아 조합을 만들 수 없습니다.");
-
-  const picked = currentBioProfile
-    ? pickWeightedUnique(pool, need, (n) => getBioNumberWeight(n, currentBioProfile))
-    : pickRandom(pool, need);
-
-  return [...includeNumbers, ...picked].sort((a, b) => a - b);
-}
-
-function renderGeneratedSets() {
-  generatedList.innerHTML = "";
-
-  try {
-    const mode = modeSelect.value;
-    const selectedNumbers = toSortedArray(pickedNumbers);
-
-    if (mode === "exclude-last" && selectedNumbers.length !== 6) {
-      throw new Error("직전회차 제외 방식은 번호를 정확히 6개 선택해야 합니다.");
-    }
-
-    const setCount = Number(setCountSelect.value);
-    for (let i = 0; i < setCount; i += 1) {
-      const numbers = generateOneSet(mode, selectedNumbers);
-      const li = document.createElement("li");
-      li.className = "number-set";
-
-      const label = document.createElement("strong");
-      label.textContent = `${i + 1}세트`;
-      li.appendChild(label);
-
-      numbers.forEach((num) => li.appendChild(createBall(num)));
-
-      if (currentBioScore !== null) {
-        const setQuality = calculateSetQuality(numbers);
-        const finalScore = Math.round(setQuality * 0.55 + currentBioScore * 0.45);
-        const badge = document.createElement("span");
-        badge.className = "score-badge";
-        badge.textContent = `구매 점수 ${finalScore}점`;
-        li.appendChild(badge);
-      }
-
-      generatedList.appendChild(li);
-    }
-
-    const bioMode = currentBioProfile ? " · 바이오리듬 연동 ON" : "";
-    generatorMessage.textContent = `생성 완료: 방식=${mode}, 선택=${selectedNumbers.length}개${bioMode}`;
-  } catch (error) {
-    generatorMessage.textContent = `생성 실패: ${error.message}`;
-  }
-}
-
-function applyLastDrawNumbers(numbers) {
-  pickedNumbers.clear();
-  numbers.forEach((n) => pickedNumbers.add(n));
-  paintModePicker();
-  syncModePickedSummary();
-}
-
-async function autoLoadLastDrawNumbers() {
-  try {
-    generatorMessage.textContent = "직전회차 번호 불러오는 중...";
-    const body = await requestJson(`${API_DRAW}?drawNo=latest`);
-    const numbers = [
-      body.data.drwtNo1,
-      body.data.drwtNo2,
-      body.data.drwtNo3,
-      body.data.drwtNo4,
-      body.data.drwtNo5,
-      body.data.drwtNo6,
-    ];
-    cachedLatestDrawNumbers = [...numbers];
-    applyLastDrawNumbers(numbers);
-    generatorMessage.textContent = `직전회차 ${body.data.drwNo}회 번호 자동 적용 완료`;
-  } catch (error) {
-    if (cachedLatestDrawNumbers.length === 6) {
-      applyLastDrawNumbers(cachedLatestDrawNumbers);
-      generatorMessage.textContent = "서버 조회 실패로 마지막 저장 번호를 사용했습니다.";
-      return;
-    }
-    generatorMessage.textContent = `자동 불러오기 실패: ${error.message}`;
-  }
-}
-
-function resetGeneratorOptions() {
-  modeSelect.value = "random";
-  setCountSelect.value = "3";
-  pickedNumbers.clear();
-  updateModeUI();
-  paintModePicker();
-  syncModePickedSummary();
-  generatedList.innerHTML = "";
-  generatorMessage.textContent = "초기화 완료. 방식을 선택하고 생성하세요.";
-}
-
-async function requestJson(url) {
-  const res = await fetch(url, { cache: "no-store" });
-  const body = await res.json();
-  if (!res.ok || !body.ok) {
-    const error = new Error(body.error || `요청 실패: HTTP ${res.status}`);
-    error.blocked = Boolean(body.blocked);
-    throw error;
-  }
-  return body;
-}
-
-function renderDrawResult(data) {
-  const numbers = [
-    data.drwtNo1,
-    data.drwtNo2,
-    data.drwtNo3,
-    data.drwtNo4,
-    data.drwtNo5,
-    data.drwtNo6,
-  ];
-  cachedLatestDrawNumbers = [...numbers];
-
-  drawResult.innerHTML = "";
-
-  const title = document.createElement("div");
-  title.innerHTML = `<strong>${data.drwNo}회</strong> (${data.drwNoDate})`;
-
-  const ballsWrap = document.createElement("div");
-  ballsWrap.className = "number-set";
-  numbers.forEach((num) => ballsWrap.appendChild(createBall(num)));
-
-  const bonusLabel = document.createElement("span");
-  bonusLabel.textContent = "보너스";
-  bonusLabel.className = "bonus-label";
-
-  ballsWrap.appendChild(bonusLabel);
-  ballsWrap.appendChild(createBall(data.bnusNo));
-
-  const prize = document.createElement("p");
-  prize.className = "result-meta";
-  prize.textContent = `1등 ${Number(data.firstPrzwnerCo).toLocaleString()}명 · 1인당 ${Number(data.firstWinamnt).toLocaleString()}원`;
-
-  drawResult.append(title, ballsWrap, prize);
-}
-
-function updateLatestJackpot(data) {
-  const net = calculateTakeHomeAmount(data.firstWinamnt);
-  latestNetAmount.textContent = net > 0 ? `${net.toLocaleString()}원` : "정보 없음";
-  latestJackpotMeta.textContent = `${data.drwNo}회 (${data.drwNoDate}) · 세전 ${Number(data.firstWinamnt || 0).toLocaleString()}원 · 1등 ${Number(data.firstPrzwnerCo || 0).toLocaleString()}명`;
-}
-
-function renderStoreResult(drawNo, stores) {
-  if (!stores.length) {
-    storeResult.textContent = `${drawNo}회 판매점 정보를 찾지 못했습니다.`;
-    return;
-  }
-
-  const ul = document.createElement("ul");
-  ul.className = "store-list";
-
-  stores.forEach((store) => {
-    const li = document.createElement("li");
-    li.textContent = `[${store.method}] ${store.name} - ${store.address}`;
-    ul.appendChild(li);
-  });
-
-  storeResult.innerHTML = `<strong>${drawNo}회 1등 판매점 ${stores.length}곳</strong>`;
-  storeResult.appendChild(ul);
-}
-
-async function handleCheckDraw() {
-  const drawNo = Number(drawInput.value);
-  if (!Number.isInteger(drawNo) || drawNo < 1) {
-    drawResult.textContent = "1 이상의 회차 번호를 입력하세요.";
-    return;
-  }
-
-  drawResult.textContent = "조회 중...";
-  try {
-    const body = await requestJson(`${API_DRAW}?drawNo=${drawNo}`);
-    renderDrawResult(body.data);
-  } catch (error) {
-    if (error.blocked) {
-      drawResult.innerHTML = `조회 실패: ${error.message}<br/><a href="https://www.dhlottery.co.kr/gameResult.do?method=byWin&drwNo=${drawNo}" target="_blank" rel="noopener noreferrer">동행복권 공식 페이지에서 확인</a>`;
-      return;
-    }
-    drawResult.textContent = `조회 실패: ${error.message}`;
-  }
-}
-
-async function handleLoadLatest() {
-  drawResult.textContent = "최신 회차 조회 중...";
-  try {
-    const body = await requestJson(`${API_DRAW}?drawNo=latest`);
-    drawInput.value = body.data.drwNo;
-    storeInput.value = body.data.drwNo;
-    renderDrawResult(body.data);
-    updateLatestJackpot(body.data);
-  } catch (error) {
-    drawResult.textContent = `최신 회차 조회 실패: ${error.message}`;
-  }
-}
-
-async function loadLatestSummary() {
-  try {
-    const body = await requestJson(`${API_DRAW}?drawNo=latest`);
-    drawInput.value = body.data.drwNo;
-    storeInput.value = body.data.drwNo;
-    updateLatestJackpot(body.data);
-  } catch (error) {
-    latestNetAmount.textContent = "조회 실패";
-    latestJackpotMeta.textContent = error.message;
-  }
+  drawWave(23, "#f59e0b", "물리");
+  drawWave(28, "#ef4444", "감성");
+  drawWave(33, "#3b82f6", "지성");
 }
 
 function handleCalculateBiorhythm() {
   try {
-    if (!birthDateInput.value) {
-      throw new Error("생년월일을 먼저 입력하세요.");
-    }
     const birthDate = normalizeBirthDateInput(birthDateInput.value);
-    birthDateInput.value = formatBirthInput(birthDate.compact);
     const result = calculateBiorhythm(birthDate);
-
-    const strengthEl = document.querySelector('input[name="bio-strength"]:checked');
-    const strength = strengthEl ? strengthEl.value : "medium";
-
-    const bioProfile = buildBioProfile(birthDate, result, strength);
+    const strength = document.querySelector('input[name="bio-strength"]:checked').value;
+    currentBioProfile = buildBioProfile(birthDate, result, strength);
     currentBioScore = result.overall;
-    currentBioProfile = bioProfile;
 
     biorhythmResult.innerHTML = `
-      <strong>오늘의 바이오리듬 분석 결과</strong>
       <div class="bio-grid">
-        <div class="bio-item">
-          <strong>신체 리듬 (${result.physical}점)</strong>
-          <div class="bio-bar-bg"><div class="bio-bar-fill physical" style="width: ${result.physical}%"></div></div>
-        </div>
-        <div class="bio-item">
-          <strong>감성 리듬 (${result.emotional}점)</strong>
-          <div class="bio-bar-bg"><div class="bio-bar-fill emotional" style="width: ${result.emotional}%"></div></div>
-        </div>
-        <div class="bio-item">
-          <strong>지성 리듬 (${result.intellectual}점)</strong>
-          <div class="bio-bar-bg"><div class="bio-bar-fill intellectual" style="width: ${result.intellectual}%"></div></div>
-        </div>
-        <div class="bio-item">
-          <strong>구매 적합도 (${result.overall}점)</strong>
-          <div class="bio-bar-bg"><div class="bio-bar-fill overall" style="width: ${result.overall}%"></div></div>
-        </div>
+        <div class="bio-item"><strong>신체</strong><span>${result.physical}%</span></div>
+        <div class="bio-item"><strong>감성</strong><span>${result.emotional}%</span></div>
+        <div class="bio-item"><strong>지성</strong><span>${result.intellectual}%</span></div>
+        <div class="bio-item"><strong>행운지수</strong><span>${result.overall}%</span></div>
       </div>
-
       <div class="bio-chart-container">
-        <canvas id="bio-canvas" width="600" height="200"></canvas>
+        <canvas id="bio-canvas" width="800" height="300" style="width:100%; height:auto;"></canvas>
         <div class="bio-legend">
-          <div class="legend-item"><span class="dot p"></span> 물리</div>
-          <div class="legend-item"><span class="dot e"></span> 감성</div>
-          <div class="legend-item"><span class="dot i"></span> 지성</div>
+          <div class="legend-item"><span class="dot p" style="background:#f59e0b"></span> 신체(1~15)</div>
+          <div class="legend-item"><span class="dot e" style="background:#ef4444"></span> 감성(16~30)</div>
+          <div class="legend-item"><span class="dot i" style="background:#3b82f6"></span> 지성(31~45)</div>
         </div>
       </div>
-
-      <p class="bio-note">연동 강도: ${strength === "weak" ? "약" : strength === "strong" ? "강" : "중"}</p>
-      <div class="bio-lucky-wrap" style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e9eef5;">
-        <p style="margin: 0 0 8px; font-weight: 700; font-size: 0.9rem;">연동 추천 번호 (6개)</p>
-        <div id="bio-lucky-balls" class="number-set mini-balls" style="border: none; background: none; padding: 0;"></div>
+      <div class="bio-lucky-wrap" style="margin-top: 1.5rem; text-align: center;">
+        <p style="font-weight: 800; margin-bottom: 1rem; color: var(--brand);">오늘의 추천 리듬 번호</p>
+        <div id="bio-lucky-balls" style="display:flex; justify-content:center; gap:8px;"></div>
       </div>
-      <p class="bio-note">번호 생성 시 바이오리듬 가중치로 숫자 풀을 먼저 선별하고, 조합 점수(55%)와 바이오리듬 점수(45%)를 합산해 세트별 구매 점수를 표시합니다.</p>
     `;
 
-    const canvas = document.querySelector("#bio-canvas");
-    drawBiorhythmChart(canvas, result.days);
-
-    const luckyBallsContainer = biorhythmResult.querySelector("#bio-lucky-balls");
-    bioProfile.luckyNumbers.forEach((num) => {
-      luckyBallsContainer.appendChild(createBall(num));
-    });
+    drawBiorhythmChart(document.querySelector("#bio-canvas"), result.days);
+    const ballContainer = document.querySelector("#bio-lucky-balls");
+    currentBioProfile.luckyNumbers.forEach(n => ballContainer.appendChild(createBall(n)));
+    
+    generatorMessage.textContent = "리듬 분석이 생성기에 반영되었습니다. 번호를 생성해 보세요!";
   } catch (error) {
-    currentBioScore = null;
-    currentBioProfile = null;
-    biorhythmResult.textContent = `계산 실패: ${error.message}`;
+    biorhythmResult.textContent = error.message;
   }
 }
 
-async function handleStoreSearch() {
-  const drawNo = Number(storeInput.value);
-  if (!Number.isInteger(drawNo) || drawNo < 1) {
-    storeResult.textContent = "1 이상의 회차 번호를 입력하세요.";
-    return;
-  }
+async function renderGeneratedSets() {
+  generatedList.innerHTML = "";
+  const setCount = Number(setCountSelect.value);
+  const pool = Array.from({ length: 45 }, (_, i) => i + 1);
 
-  storeResult.textContent = "판매점 조회 중...";
-  try {
-    const body = await requestJson(`${API_STORES}?drawNo=${drawNo}`);
-    renderStoreResult(drawNo, body.stores || []);
-  } catch (error) {
-    if (error.blocked) {
-      storeResult.innerHTML = `조회 실패: ${error.message}<br/><a href="https://www.dhlottery.co.kr/store.do?method=topStore&pageGubun=L645&drwNo=${drawNo}" target="_blank" rel="noopener noreferrer">동행복권 공식 판매점 페이지 열기</a>`;
-      return;
+  for (let i = 0; i < setCount; i += 1) {
+    let numbers;
+    if (currentBioProfile) {
+      // 리듬 기반 가중치 추출
+      numbers = pickWeightedUnique(pool, 6, (n) => {
+        let w = n <= 15 ? currentBioProfile.lowWeight : n <= 30 ? currentBioProfile.midWeight : currentBioProfile.highWeight;
+        w *= (n % 2 === 0 ? currentBioProfile.evenWeight : currentBioProfile.oddWeight);
+        // 연동 추천 번호에 추가 보너스
+        if (currentBioProfile.luckyNumbers.includes(n)) w *= currentBioProfile.luckyWeight;
+        return w;
+      }).sort((a, b) => a - b);
+    } else {
+      numbers = shuffle([...pool]).slice(0, 6).sort((a, b) => a - b);
     }
-    storeResult.textContent = `조회 실패: ${error.message}`;
-  }
-}
 
-function initAdsense() {
-  const adSlots = document.querySelectorAll(".adsbygoogle");
-  adSlots.forEach(() => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (error) {
-      // 광고 스크립트 미설치/심사 전 상태에서는 조용히 무시
+    const li = document.createElement("li");
+    li.className = "number-set";
+    const label = document.createElement("span");
+    label.style.fontWeight = "800";
+    label.style.marginRight = "1rem";
+    label.textContent = `${i + 1}SET`;
+    li.appendChild(label);
+    numbers.forEach(n => li.appendChild(createBall(n)));
+    
+    if (currentBioScore) {
+      const score = Math.round(currentBioScore * 0.4 + (Math.random() * 20 + 40) * 0.6);
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.style.marginLeft = "auto";
+      badge.textContent = `적합도 ${score}%`;
+      li.appendChild(badge);
     }
-  });
+    generatedList.appendChild(li);
+  }
 }
 
-modeSelect.addEventListener("change", updateModeUI);
-modeSelect.addEventListener("change", () => {
-  if (modeSelect.value === "exclude-last" && pickedNumbers.size === 0) {
-    autoLoadLastDrawNumbers();
-  }
-});
-modePicker.addEventListener("click", handleModePickerClick);
-clearModePickedBtn.addEventListener("click", () => {
-  pickedNumbers.clear();
-  paintModePicker();
-  syncModePickedSummary();
-});
-autoLastDrawBtn.addEventListener("click", autoLoadLastDrawNumbers);
+async function requestJson(url) {
+  const res = await fetch(url);
+  return res.json();
+}
 
-generateBtn.addEventListener("click", renderGeneratedSets);
-resetOptionsBtn.addEventListener("click", resetGeneratorOptions);
-checkDrawBtn.addEventListener("click", handleCheckDraw);
-loadLatestBtn.addEventListener("click", handleLoadLatest);
-storeSearchBtn.addEventListener("click", handleStoreSearch);
+async function handleCheckDraw() {
+  const drawNo = drawInput.value;
+  if (!drawNo) return;
+  drawResult.textContent = "조회 중...";
+  const body = await requestJson(`${API_DRAW}?drawNo=${drawNo}`);
+  if (body.ok) {
+    const data = body.data;
+    drawResult.innerHTML = `<strong>${data.drwNo}회</strong>: ${data.drwtNo1}, ${data.drwtNo2}, ${data.drwtNo3}, ${data.drwtNo4}, ${data.drwtNo5}, ${data.drwtNo6} + ${data.bnusNo}`;
+  } else {
+    drawResult.textContent = "조회 실패";
+  }
+}
+
+async function handleLoadLatest() {
+  const body = await requestJson(`${API_DRAW}?drawNo=latest`);
+  if (body.ok) {
+    drawInput.value = body.data.drwNo;
+    handleCheckDraw();
+  }
+}
+
 calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
-birthDateInput.addEventListener("input", () => {
-  birthDateInput.value = formatBirthInput(birthDateInput.value);
+generateBtn.addEventListener("click", renderGeneratedSets);
+resetOptionsBtn.addEventListener("click", () => {
+  currentBioProfile = null;
+  currentBioScore = null;
+  generatedList.innerHTML = "";
+  biorhythmResult.innerHTML = "생년월일을 입력하면 리듬 분석 그래프가 나타납니다.";
+  generatorMessage.textContent = "초기화되었습니다.";
 });
+loadLatestBtn.addEventListener("click", handleLoadLatest);
+checkDrawBtn.addEventListener("click", handleCheckDraw);
 
-// 연동 강도 변경 시 즉시 다시 계산하여 번호 변화 보여주기
-document.querySelectorAll('input[name="bio-strength"]').forEach((radio) => {
-  radio.addEventListener("change", () => {
-    if (birthDateInput.value.replace(/\D/g, "").length === 8) {
-      handleCalculateBiorhythm();
-    }
-  });
+document.querySelectorAll('input[name="bio-strength"]').forEach(r => {
+  r.addEventListener("change", () => { if (birthDateInput.value.length >= 8) handleCalculateBiorhythm(); });
 });
-
-buildModePicker();
-updateModeUI();
-paintModePicker();
-syncModePickedSummary();
-generatedList.innerHTML = "";
-generatorMessage.textContent = "실행 버튼을 눌러 번호를 생성하세요.";
-loadLatestSummary();
-initAdsense();
