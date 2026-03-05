@@ -1,5 +1,28 @@
 // HMD-V2 Proprietary Algorithm (Server-side)
 const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
+const RANGE_MIN = 1;
+const RANGE_MAX = 45;
+const PICK_COUNT = 6;
+const STRENGTH_TUNING = {
+  weak: {
+    trialsPerSet: 10,
+    overlapPenaltyUnit: 4.5,
+    sumSlope: 0.30,
+    targetBias: 0.88
+  },
+  normal: {
+    trialsPerSet: 16,
+    overlapPenaltyUnit: 6.0,
+    sumSlope: 0.34,
+    targetBias: 1.0
+  },
+  strong: {
+    trialsPerSet: 24,
+    overlapPenaltyUnit: 7.0,
+    sumSlope: 0.38,
+    targetBias: 1.14
+  }
+};
 
 function pickWeightedUnique(pool, count, getWeight) {
   const source = [...pool];
@@ -24,18 +47,89 @@ function pickWeightedUnique(pool, count, getWeight) {
   return picked;
 }
 
-function calculateHarmonicScore(numbers, profile) {
-  let totalWeight = 0;
-  numbers.forEach(n => {
+function countByMod(numbers) {
+  return numbers.reduce((acc, n) => {
+    acc[n % 3] += 1;
+    return acc;
+  }, [0, 0, 0]);
+}
+
+function getOddCount(numbers) {
+  return numbers.reduce((acc, n) => acc + (n % 2 === 1 ? 1 : 0), 0);
+}
+
+function getPrimeCount(numbers) {
+  return numbers.reduce((acc, n) => acc + (PRIMES.includes(n) ? 1 : 0), 0);
+}
+
+function getDecadeDiversity(numbers) {
+  return new Set(numbers.map((n) => Math.floor((n - 1) / 10))).size;
+}
+
+function getConsecutiveCount(numbers) {
+  let consecutivePairs = 0;
+  for (let i = 1; i < numbers.length; i += 1) {
+    if (numbers[i] - numbers[i - 1] === 1) consecutivePairs += 1;
+  }
+  return consecutivePairs;
+}
+
+function buildTargetModel(profile, tuning) {
+  const modWeights = [profile.mod0Weight, profile.mod1Weight, profile.mod2Weight];
+  const modSum = modWeights.reduce((acc, v) => acc + v, 0);
+  const modTarget = modWeights.map((v) => (v / modSum) * PICK_COUNT);
+
+  return {
+    modTarget,
+    primeTarget: (profile.overall >= 65 ? 2.3 : profile.overall >= 50 ? 2.0 : 1.7) * tuning.targetBias,
+    oddTarget: (3.0 + (profile.overall >= 70 ? 0.2 : 0)) * Math.min(1.06, tuning.targetBias),
+    sumTarget: 120 + profile.overall * 0.5
+  };
+}
+
+function calculateHarmonicScore(numbers, profile, targetModel, tuning) {
+  const sorted = [...numbers].sort((a, b) => a - b);
+  const modCounts = countByMod(sorted);
+  const primeCount = getPrimeCount(sorted);
+  const oddCount = getOddCount(sorted);
+  const sum = sorted.reduce((acc, v) => acc + v, 0);
+  const span = sorted[sorted.length - 1] - sorted[0];
+  const decadeDiversity = getDecadeDiversity(sorted);
+  const consecutivePairs = getConsecutiveCount(sorted);
+
+  const modDeviation = modCounts.reduce(
+    (acc, v, idx) => acc + Math.abs(v - targetModel.modTarget[idx]),
+    0
+  );
+  const modScore = Math.max(0, 26 - modDeviation * 5.2);
+  const primeScore = Math.max(0, 16 - Math.abs(primeCount - targetModel.primeTarget) * 5);
+  const oddEvenScore = Math.max(0, 14 - Math.abs(oddCount - targetModel.oddTarget) * 4.2);
+  const sumScore = Math.max(0, 18 - Math.abs(sum - targetModel.sumTarget) * tuning.sumSlope);
+  const spanScore = Math.max(0, 12 - Math.abs(span - 28) * 0.5);
+  const diversityScore = Math.max(0, Math.min(8, decadeDiversity * 2));
+  const consecutivePenalty = consecutivePairs >= 3 ? 9 : consecutivePairs * 2.8;
+
+  let raw = 18 + modScore + primeScore + oddEvenScore + sumScore + spanScore + diversityScore - consecutivePenalty;
+  raw = Math.max(18, raw);
+  return Math.min(99, Math.round(raw));
+}
+
+function overlapCount(a, b) {
+  const setB = new Set(b);
+  return a.reduce((acc, n) => acc + (setB.has(n) ? 1 : 0), 0);
+}
+
+function createNumberWeightFn(profile) {
+  return (n) => {
     let w = 1.0;
     if (n % 3 === 1) w *= profile.mod1Weight;
     else if (n % 3 === 2) w *= profile.mod2Weight;
     else w *= profile.mod0Weight;
     if (PRIMES.includes(n)) w *= profile.primeWeight;
-    totalWeight += w;
-  });
-  const baseAvg = totalWeight / 6;
-  return Math.min(99, Math.max(10, Math.round(baseAvg * 25)));
+    if (n <= 15 && profile.physical >= 60) w *= 1.08;
+    if (n >= 31 && profile.intellectual >= 60) w *= 1.08;
+    return w;
+  };
 }
 
 export async function onRequestPost({ request }) {
@@ -43,7 +137,9 @@ export async function onRequestPost({ request }) {
     const { rhythm, strength, setCount } = await request.json();
     
     // 가중치 보정 (영업비밀 로직)
-    const factor = strength === "weak" ? 0.3 : strength === "strong" ? 3.0 : 1.0;
+    const strengthKey = strength === "weak" || strength === "strong" ? strength : "normal";
+    const tuning = STRENGTH_TUNING[strengthKey];
+    const factor = strength === "weak" ? 0.25 : strength === "strong" ? 3.3 : 1.0;
     const adjust = (val) => 1 + (val - 1) * factor;
     
     const profile = {
@@ -51,24 +147,29 @@ export async function onRequestPost({ request }) {
       mod2Weight: adjust(0.5 + rhythm.emotional / 50),
       mod0Weight: adjust(0.5 + rhythm.intellectual / 50),
       primeWeight: adjust(rhythm.overall >= 50 ? 1.3 : 0.8),
+      physical: rhythm.physical,
+      emotional: rhythm.emotional,
+      intellectual: rhythm.intellectual,
       overall: rhythm.overall
     };
 
     const results = [];
-    const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+    const pool = Array.from({ length: RANGE_MAX }, (_, i) => i + RANGE_MIN);
+    const targetModel = buildTargetModel(profile, tuning);
+    const getWeight = createNumberWeightFn(profile);
 
     for (let i = 0; i < setCount; i++) {
-      const numbers = pickWeightedUnique(pool, 6, (n) => {
-        let w = 1.0;
-        if (n % 3 === 1) w *= profile.mod1Weight;
-        else if (n % 3 === 2) w *= profile.mod2Weight;
-        else w *= profile.mod0Weight;
-        if (PRIMES.includes(n)) w *= profile.primeWeight;
-        return w;
-      }).sort((a, b) => a - b);
-
-      const score = calculateHarmonicScore(numbers, profile);
-      results.push({ numbers, score });
+      let best = null;
+      for (let t = 0; t < tuning.trialsPerSet; t += 1) {
+        const numbers = pickWeightedUnique(pool, PICK_COUNT, getWeight).sort((a, b) => a - b);
+        let score = calculateHarmonicScore(numbers, profile, targetModel, tuning);
+        if (results.length > 0) {
+          const maxOverlap = Math.max(...results.map((r) => overlapCount(numbers, r.numbers)));
+          if (maxOverlap >= 4) score -= (maxOverlap - 3) * tuning.overlapPenaltyUnit;
+        }
+        if (!best || score > best.score) best = { numbers, score };
+      }
+      results.push({ numbers: best.numbers, score: Math.max(10, Math.min(99, best.score)) });
     }
 
     return new Response(JSON.stringify({ ok: true, data: results }), {
