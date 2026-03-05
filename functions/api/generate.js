@@ -23,6 +23,9 @@ const STRENGTH_TUNING = {
     targetBias: 1.14
   }
 };
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 25;
+const requestBuckets = new Map();
 
 function pickWeightedUnique(pool, count, getWeight) {
   const source = [...pool];
@@ -132,8 +135,55 @@ function createNumberWeightFn(profile) {
   };
 }
 
+function getClientIp(request) {
+  const cfIp = request.headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp;
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  return "unknown";
+}
+
+function checkRateLimit(clientIp) {
+  const now = Date.now();
+  const hitList = requestBuckets.get(clientIp) || [];
+  const recentHits = hitList.filter((ts) => now - ts < RATE_LIMIT_WINDOW_MS);
+  if (recentHits.length >= RATE_LIMIT_MAX) {
+    requestBuckets.set(clientIp, recentHits);
+    return false;
+  }
+  recentHits.push(now);
+  requestBuckets.set(clientIp, recentHits);
+  return true;
+}
+
+function simulateScoreBaseline(profile, targetModel, tuning) {
+  const pool = Array.from({ length: RANGE_MAX }, (_, i) => i + RANGE_MIN);
+  const getWeight = createNumberWeightFn(profile);
+  const samples = [];
+  for (let i = 0; i < 220; i += 1) {
+    const numbers = pickWeightedUnique(pool, PICK_COUNT, getWeight).sort((a, b) => a - b);
+    samples.push(calculateHarmonicScore(numbers, profile, targetModel, tuning));
+  }
+  samples.sort((a, b) => a - b);
+  return samples;
+}
+
+function scoreToPercentile(score, sortedSamples) {
+  const lowerOrEqual = sortedSamples.filter((s) => s <= score).length;
+  const percentile = (lowerOrEqual / sortedSamples.length) * 100;
+  return Number(percentile.toFixed(1));
+}
+
 export async function onRequestPost({ request }) {
   try {
+    const clientIp = getClientIp(request);
+    if (!checkRateLimit(clientIp)) {
+      return new Response(JSON.stringify({ ok: false, error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." }), {
+        status: 429,
+        headers: { "content-type": "application/json" }
+      });
+    }
+
     const { rhythm, strength, setCount } = await request.json();
     
     // 가중치 보정 (영업비밀 로직)
@@ -157,6 +207,7 @@ export async function onRequestPost({ request }) {
     const pool = Array.from({ length: RANGE_MAX }, (_, i) => i + RANGE_MIN);
     const targetModel = buildTargetModel(profile, tuning);
     const getWeight = createNumberWeightFn(profile);
+    const baselineSamples = simulateScoreBaseline(profile, targetModel, tuning);
 
     for (let i = 0; i < setCount; i++) {
       let best = null;
@@ -169,7 +220,9 @@ export async function onRequestPost({ request }) {
         }
         if (!best || score > best.score) best = { numbers, score };
       }
-      results.push({ numbers: best.numbers, score: Math.max(10, Math.min(99, best.score)) });
+      const secureScore = Math.max(10, Math.min(99, best.score));
+      const rankPercentile = scoreToPercentile(secureScore, baselineSamples);
+      results.push({ numbers: best.numbers, score: secureScore, rankPercentile });
     }
 
     return new Response(JSON.stringify({ ok: true, data: results }), {

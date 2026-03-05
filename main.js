@@ -34,90 +34,6 @@ window.scrollTo(0, 0);
 let currentRhythm = null;
 let historicalDraws = [];
 let isSyncing = false;
-let historicalPatternModel = null;
-let historicalRankCache = null;
-
-const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
-const STRENGTH_LOCAL_TUNING = {
-  weak: { blendServer: 0.5, historyWeight: 0.7, modPenaltyScale: 5.0 },
-  normal: { blendServer: 0.6, historyWeight: 1.0, modPenaltyScale: 5.2 },
-  strong: { blendServer: 0.72, historyWeight: 1.2, modPenaltyScale: 5.5 }
-};
-
-function countByMod(numbers) {
-  return numbers.reduce((acc, n) => {
-    acc[n % 3] += 1;
-    return acc;
-  }, [0, 0, 0]);
-}
-
-function buildHistoricalPatternModel(draws) {
-  if (!Array.isArray(draws) || draws.length < 10) return null;
-  const freq = Array(46).fill(0);
-  const recentFreq = Array(46).fill(0);
-  const recentWindow = draws.slice(-20);
-  const sums = [];
-
-  draws.forEach((d) => {
-    const sum = d.numbers.reduce((acc, n) => acc + n, 0);
-    sums.push(sum);
-    d.numbers.forEach((n) => { freq[n] += 1; });
-  });
-  recentWindow.forEach((d) => {
-    d.numbers.forEach((n) => { recentFreq[n] += 1; });
-  });
-
-  const meanSum = sums.reduce((acc, s) => acc + s, 0) / sums.length;
-  const variance = sums.reduce((acc, s) => acc + ((s - meanSum) ** 2), 0) / sums.length;
-  return {
-    totalDraws: draws.length,
-    freq,
-    recentFreq,
-    meanSum,
-    stdSum: Math.sqrt(variance)
-  };
-}
-
-function getLocalScore(numbers, rhythm, patternModel, strength = "normal") {
-  const tuning = STRENGTH_LOCAL_TUNING[strength] || STRENGTH_LOCAL_TUNING.normal;
-  const sorted = [...numbers].sort((a, b) => a - b);
-  const modCounts = countByMod(sorted);
-  const primeCount = sorted.filter((n) => PRIMES.includes(n)).length;
-  const oddCount = sorted.filter((n) => n % 2 === 1).length;
-  const sum = sorted.reduce((acc, n) => acc + n, 0);
-
-  const modWeights = [
-    0.5 + rhythm.intellectual / 50,
-    0.5 + rhythm.physical / 50,
-    0.5 + rhythm.emotional / 50
-  ];
-  const modWeightSum = modWeights[0] + modWeights[1] + modWeights[2];
-  const modTarget = modWeights.map((v) => (v / modWeightSum) * 6);
-
-  const modDeviation = modCounts.reduce((acc, v, idx) => acc + Math.abs(v - modTarget[idx]), 0);
-  const modScore = Math.max(0, 28 - modDeviation * tuning.modPenaltyScale);
-  const primeTarget = rhythm.overall >= 65 ? 2.3 : rhythm.overall >= 50 ? 2.0 : 1.7;
-  const primeScore = Math.max(0, 16 - Math.abs(primeCount - primeTarget) * 5);
-  const oddEvenScore = Math.max(0, 14 - Math.abs(oddCount - 3) * 4.3);
-
-  let historyScore = 8;
-  if (patternModel) {
-    const freqScore = sorted.reduce((acc, n) => {
-      const longRatio = patternModel.freq[n] / patternModel.totalDraws;
-      const recentRatio = patternModel.recentFreq[n] / Math.max(1, Math.min(20, patternModel.totalDraws));
-      const longTerm = Math.max(0, 1 - Math.abs(longRatio - 0.133) * 7.5);
-      const recency = Math.max(0, 1 - recentRatio * 1.3);
-      return acc + ((longTerm * 0.65 + recency * 0.35) * 2);
-    }, 0);
-
-    const sumScore = patternModel.stdSum > 0
-      ? Math.max(0, 16 - Math.abs(sum - patternModel.meanSum) / (patternModel.stdSum * 0.24))
-      : 8;
-    historyScore = Math.min(26, (freqScore + sumScore) * tuning.historyWeight);
-  }
-
-  return Math.max(10, Math.min(99, Math.round(22 + modScore + primeScore + oddEvenScore + historyScore)));
-}
 
 function ballColor(number) {
   if (number <= 10) return "#f59e0b";
@@ -200,7 +116,6 @@ function handleCalculateBiorhythm() {
     const birthDate = normalizeBirthDateInput(birthDateInput.value);
     const result = calculateBiorhythm(birthDate);
     currentRhythm = result;
-    historicalRankCache = null;
     
     biorhythmResult.innerHTML = `
       <div class="bio-chart-container">
@@ -216,20 +131,6 @@ function handleCalculateBiorhythm() {
     drawBiorhythmChart(document.querySelector("#bio-canvas"), result.days);
     generatorMessage.textContent = "패턴 분석 완료! 이제 번호를 생성하세요.";
   } catch (error) { biorhythmResult.textContent = error.message; }
-}
-
-function getRhythmRank(score, strength = "normal") {
-  if (historicalDraws.length < 100 || !currentRhythm) return null;
-  if (!historicalRankCache || historicalRankCache.strength !== strength) {
-    const model = historicalPatternModel || buildHistoricalPatternModel(historicalDraws);
-    historicalRankCache = {
-      strength,
-      values: historicalDraws.map((d) => getLocalScore(d.numbers, currentRhythm, model, strength))
-    };
-  }
-  const allScores = historicalRankCache.values;
-  const higher = allScores.filter(s => s > score).length;
-  return ((higher / allScores.length) * 100).toFixed(1);
 }
 
 async function renderGeneratedSets() {
@@ -248,21 +149,16 @@ async function renderGeneratedSets() {
     });
     const body = await res.json();
     if (!body.ok) throw new Error(body.error);
-    const pattern = historicalPatternModel || buildHistoricalPatternModel(historicalDraws);
-    const localTuning = STRENGTH_LOCAL_TUNING[strength] || STRENGTH_LOCAL_TUNING.normal;
 
     body.data.forEach((item, i) => {
-      const localScore = getLocalScore(item.numbers, currentRhythm, pattern, strength);
-      const finalScore = Math.round(item.score * localTuning.blendServer + localScore * (1 - localTuning.blendServer));
-      const rank = getRhythmRank(finalScore, strength);
-      const rankText = rank !== null ? ` (역대 상위 ${rank}%)` : "";
+      const rankText = Number.isFinite(item.rankPercentile) ? ` (시뮬레이션 상위 ${item.rankPercentile}%)` : "";
       
       const li = document.createElement("li"); li.className = "number-set";
       const label = document.createElement("span"); label.style.fontWeight = "800"; label.style.marginRight = "1rem"; label.textContent = `${i + 1}SET`;
       li.appendChild(label);
       item.numbers.forEach(n => li.appendChild(createBall(n)));
       const badge = document.createElement("span"); badge.className = "badge"; badge.style.marginLeft = "auto"; badge.style.background = "var(--brand-2)";
-      badge.textContent = `리듬 점수 ${finalScore}점${rankText}`;
+      badge.textContent = `리듬 점수 ${item.score}점${rankText}`;
       li.appendChild(badge);
       generatedList.appendChild(li);
     });
@@ -314,8 +210,6 @@ async function syncHistoricalData(latestNo) {
   const startNo = draws.length > 0 ? draws[draws.length - 1].drwNo + 1 : 1;
   if (startNo > latestNo) {
     historicalDraws = draws;
-    historicalPatternModel = buildHistoricalPatternModel(draws);
-    historicalRankCache = null;
     isSyncing = false;
     return;
   }
@@ -332,8 +226,6 @@ async function syncHistoricalData(latestNo) {
   }
   localStorage.setItem("lotto_history", JSON.stringify(draws));
   historicalDraws = draws;
-  historicalPatternModel = buildHistoricalPatternModel(draws);
-  historicalRankCache = null;
   isSyncing = false;
 }
 
