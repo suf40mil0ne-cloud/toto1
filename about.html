@@ -3,42 +3,106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="로또리듬 사이트 소개" />
-  <title>사이트소개 | 로또리듬</title>
+  <title>사이트 소개 | 로또리듬</title>
+  <meta name="description" content="로또리듬의 운영 목적, 제공 정보 범위, 면책 원칙을 설명하는 사이트 소개 페이지입니다." />
+  <link rel="canonical" href="/about.html" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet" />
   <link href="/style.css" rel="stylesheet" />
 </head>
 <body>
-  <header class="topbar">
-    <a class="logo" href="/">LOTTO RHYTHM</a>
-    <nav>
-      <a href="/">홈</a>
-      <a href="/#biorhythm-card">바이오 분석</a>
-      <a href="/#generator-card">리듬 생성기</a>
-      <a href="/guides.html">리듬 가이드</a>
-      <a href="/privacy.html">개인정보처리방침</a>
-      <a href="/contact.html">문의</a>
-    </nav>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="logo" href="/">로또리듬</a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="/">홈</a>
+        <a href="/#biorhythm-card">바이오 분석</a>
+        <a href="/#generator-card">번호 생성기</a>
+        <a href="/guides.html">로또 데이터 가이드</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/about.html">사이트 소개</a>
+      </nav>
+    </div>
   </header>
-  <main class="container">
-    <section class="card">
-      <h1>사이트 소개</h1>
-      <p><strong>로또리듬(LOTTO RHYTHM)</strong>은 사용자의 고유한 바이오리듬과 로또 빅데이터를 결합하여 과학적인 번호 생성 경험을 제공하는 플랫폼입니다.</p>
-      <p>단순한 무작위 번호 생성이 아니라, 생년월일을 기반으로 한 신체, 감성, 지성 에너지를 분석하여 추출 확률 밀도를 전 대역에 분산 배치하는 <strong>HMD-V2(Harmonic Modulo Distribution)</strong> 알고리즘을 사용합니다.</p>
-      <p>저희는 다음과 같은 가치를 제공합니다:</p>
-      <ul style="margin-top: 1rem; padding-left: 1.5rem; color: var(--ink-soft);">
-        <li>개인화된 리듬 분석을 통한 행운의 번호 추천</li>
-        <li>역대 당첨 데이터와의 실시간 리듬 합치도 분석</li>
-        <li>최신 회차 당첨금 및 실수령액 정보 제공</li>
-        <li>1등 배출 명당(판매점) 정보 조회</li>
-      </ul>
-      <p style="margin-top: 1.5rem;">당첨번호와 판매점 데이터는 동행복권 공식 데이터를 기준으로 제공되며, 본 사이트는 정보 제공 목적의 서비스로 구매 결과나 당첨을 보장하지 않습니다.</p>
+
+  <main class="container page-stack guide-page">
+    <section class="page-hero card soft-hero">
+      <p class="eyebrow">ABOUT</p>
+      <h1>로또리듬 사이트 소개</h1>
+      <p class="hero-lead">로또리듬은 로또 관련 데이터를 읽기 쉽게 정리하고, 바이오리듬을 활용한 놀이형 번호 생성을 함께 제공하는 정적 정보 사이트입니다. 이 페이지는 사이트의 운영 목적과 정보 제공 범위, 그리고 사용자에게 약속하지 않는 부분을 분명히 설명하기 위해 마련되었습니다.</p>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <p class="section-kicker">운영 목적</p>
+        <h2>기능만이 아니라 설명을 함께 제공하는 서비스</h2>
+      </div>
+      <div class="prose-grid two-col">
+        <article>
+          <p>로또리듬의 첫 번째 목적은 로또 관련 기본 데이터를 정리해 보여 주는 것입니다. 최근 회차 당첨번호, 1등 당첨금, 판매점 정보는 많은 사용자가 반복해서 찾는 정보이며, 이 사이트는 이를 한 화면에서 확인하기 쉽도록 배치합니다. 하지만 단순 조회 기능만으로는 정보 서비스로서의 맥락이 부족하다고 판단해, 각 기능 주위에 해설 문장과 가이드 문서를 함께 제공하는 구조를 채택했습니다.</p>
+          <p>두 번째 목적은 숫자 선택 과정을 놀이형 콘텐츠로 확장하는 것입니다. 바이오리듬 기반 번호 생성은 사용자가 생년월일을 입력해 오늘의 리듬을 확인하고, 그 결과를 참고용 가중치로 반영한 조합을 받아 보는 기능입니다. 이 기능은 예측 모델이 아니라 해석형 콘텐츠이며, 무작위 번호 생성에 개인화된 이야기를 더하는 역할을 합니다.</p>
+        </article>
+        <article>
+          <p>세 번째 목적은 로또 통계를 과장 없이 읽을 수 있는 환경을 제공하는 것입니다. 홀짝 분포, 번호대 분포, 연속번호, 빈도 통계는 흥미로운 주제이지만, 종종 예측의 언어로 과도하게 소비되곤 합니다. 로또리듬은 통계를 관찰의 언어로 소개하고, 예측과 혼동하지 않도록 설명을 붙입니다.</p>
+          <p>이처럼 로또리듬은 기능, 데이터, 설명이 함께 있는 구조를 지향합니다. 사용자가 버튼만 누르고 떠나는 페이지가 아니라, 실제로 읽고 이해할 수 있는 정보 페이지를 만드는 것이 운영 방향입니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <p class="section-kicker">제공 범위</p>
+        <h2>어떤 정보를 제공하고 어디까지를 다루지 않는가</h2>
+      </div>
+      <div class="prose-grid two-col">
+        <article>
+          <p>사이트는 회차별 당첨번호, 보너스번호, 1등 당첨금, 당첨자 수, 1등 판매점 정보, 바이오리듬 분석 결과, 참고용 번호 조합, 통계 해설 문서를 제공합니다. 또한 FAQ와 정책 문서를 통해 서비스 성격과 데이터 읽는 기준을 함께 설명합니다.</p>
+          <p>반면, 개별 사용자의 구매 전략을 자문하거나, 특정 조합의 우월성을 보증하거나, 실제 당첨 가능성을 높여 준다고 주장하는 서비스는 제공하지 않습니다. 사이트 안의 모든 도구와 문서는 참고와 이해를 돕기 위한 것입니다.</p>
+        </article>
+        <article>
+          <p>운영자는 사용자가 숫자와 데이터를 보다 차분하게 읽을 수 있도록 구성할 뿐, 최종 판단을 대신하지 않습니다. 또한 회원제 커뮤니티나 개인별 기록 저장 기능을 핵심 서비스로 운영하지 않으므로, 사용자는 페이지에 들어와 필요한 정보를 확인하고 읽은 뒤 바로 떠나는 정적 웹 경험을 하게 됩니다.</p>
+          <p>사이트 구조상 더 깊은 해설이 필요한 부분은 <a href="/guides.html">가이드 허브</a>에서 별도 문서로 연결되어 있습니다. 기능과 설명이 분리되지 않도록 연결성을 유지하는 것이 중요하다고 보고 있습니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading">
+        <p class="section-kicker">면책 원칙</p>
+        <h2>당첨 보장이나 확률 향상을 약속하지 않습니다</h2>
+      </div>
+      <div class="prose-grid two-col">
+        <article>
+          <p>로또리듬은 번호 생성 결과나 데이터 해설이 실제 당첨으로 이어진다고 약속하지 않습니다. 로또 추첨은 무작위 결과를 전제로 하며, 사이트의 바이오리듬 해석이나 통계 설명은 그 사실을 바꾸지 않습니다. 따라서 사용자는 생성 결과를 참고 자료와 재미 요소로만 받아들여야 합니다.</p>
+          <p>또한 사이트에서 제공하는 실수령액 계산은 세전 당첨금 기준의 참고 계산이며, 실제 세금 처리와 수령 조건에 따라 차이가 있을 수 있습니다. 판매점 정보 역시 과거 회차 기준의 기록으로, 향후 결과를 암시하지 않습니다.</p>
+        </article>
+        <article>
+          <p>운영자는 과장된 문구나 허위 사례를 통해 사용자의 기대를 부풀리는 방식을 지양합니다. 서비스의 모든 페이지는 기능의 한계와 데이터의 성격을 분명히 설명하는 방향으로 작성됩니다. 자세한 법적 조건은 <a href="/terms.html">이용약관</a>, 이용기록과 쿠키 관련 고지는 <a href="/privacy.html">개인정보처리방침</a>에서 확인할 수 있습니다.</p>
+          <p>문의가 필요하다면 <a href="/contact.html">문의 안내</a>에서 접수 가능한 범위와 회신 원칙을 확인해 주세요.</p>
+        </article>
+      </div>
     </section>
   </main>
-  <footer class="footer">
-    <p>© 2026 LOTTO RHYTHM. All rights reserved.</p>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <p class="footer-brand">로또리듬</p>
+        <p>로또 데이터를 설명과 함께 제공하는 정적 정보 사이트입니다.</p>
+      </div>
+      <div>
+        <p class="footer-title">문서</p>
+        <p><a href="/guides.html">가이드 허브</a></p>
+        <p><a href="/faq.html">FAQ 전체판</a></p>
+        <p><a href="/terms.html">이용약관</a></p>
+      </div>
+      <div>
+        <p class="footer-title">정책</p>
+        <p><a href="/privacy.html">개인정보처리방침</a></p>
+        <p><a href="/contact.html">문의 안내</a></p>
+      </div>
+    </div>
   </footer>
 </body>
 </html>

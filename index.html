@@ -3,173 +3,379 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="나만의 바이오리듬과 로또 데이터를 결합한 리듬 기반 번호 생성기, 로또리듬" />
-  <title>로또리듬 | 바이오리듬 기반 로또번호 생성 시스템</title>
+  <title>로또리듬 | 로또 데이터 해설과 바이오리듬 놀이형 번호 가이드</title>
+  <meta name="description" content="로또리듬은 최근 회차 확인, 판매점 조회, 통계 관찰, 바이오리듬 놀이형 번호 생성을 함께 제공하는 로또 데이터 가이드 사이트입니다." />
+  <link rel="canonical" href="/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet" />
   <link href="/style.css" rel="stylesheet" />
 </head>
 <body>
-  <header class="topbar">
-    <a class="logo" href="/">LOTTO RHYTHM</a>
-    <nav>
-      <a href="#biorhythm-card">바이오 분석</a>
-      <a href="#generator-card">리듬 생성기</a>
-      <a href="/guides.html">리듬 가이드</a>
-      <a href="#draw-card">당첨데이터</a>
-      <a href="#store-card">당첨판매점</a>
-    </nav>
+  <header class="site-header">
+    <div class="topbar">
+      <a class="logo" href="/">로또리듬</a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="/">홈</a>
+        <a href="#biorhythm-card">바이오 분석</a>
+        <a href="#generator-card">번호 생성기</a>
+        <a href="/guides.html">로또 데이터 가이드</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/about.html">사이트 소개</a>
+      </nav>
+    </div>
   </header>
 
-  <div class="bg-shape one"></div>
-  <div class="bg-shape two"></div>
+  <main>
+    <section class="hero-shell">
+      <div class="container hero-grid">
+        <article class="hero-copy">
+          <p class="eyebrow">LOTTO DATA GUIDE &amp; PLAYFUL RHYTHM TOOL</p>
+          <h1>읽을거리와 기능을 함께 담은 로또 데이터 해설 사이트</h1>
+          <p class="hero-lead">로또리듬은 단순히 번호만 뽑는 페이지가 아니라, 최근 회차 데이터와 판매점 정보, 통계 관찰 포인트, 바이오리듬을 활용한 놀이형 번호 생성을 한 화면에서 이해할 수 있도록 정리한 정보형 서비스입니다. 실제 당첨을 예측하거나 보장하는 서비스가 아니라, 데이터를 차분하게 읽고 재미 요소를 곁들여 살펴보는 데 목적이 있습니다.</p>
+          <div class="hero-actions">
+            <a class="button-link primary" href="#biorhythm-card">바이오 분석 시작</a>
+            <a class="button-link secondary" href="/guide-how-to-use.html">처음 이용하는 방법 보기</a>
+          </div>
+          <ul class="hero-points">
+            <li>최근 회차 당첨번호와 세전 당첨금 정보를 빠르게 확인할 수 있습니다.</li>
+            <li>1등 판매점 조회 기능과 함께 데이터 해설 문장을 제공해 빈 화면처럼 보이지 않게 구성했습니다.</li>
+            <li>바이오리듬 기능은 참고와 재미를 위한 해석형 도구라는 점을 분명히 안내합니다.</li>
+          </ul>
+        </article>
 
-  <main class="container">
-    <section class="hero theme-focus">
-      <p class="kicker">BIO-ALGORITHM SYSTEM</p>
-      <h1>당신의 리듬이<br /><span class="highlight">행운의 번호</span>가 됩니다</h1>
-      
-      <div class="jackpot-panel">
-        <p class="jackpot-label">직전회차 1등 예상 실수령액</p>
-        <p id="latest-net-amount" class="jackpot-amount">데이터 로딩 중...</p>
-        <p id="latest-jackpot-meta" class="jackpot-meta">최신 데이터를 불러오고 있습니다.</p>
-      </div>
-
-      <div class="logic-infographic">
-        <div class="logic-step">
-          <span class="icon">📅</span>
-          <strong>생년월일 분석</strong>
-          <p>고유 리듬 계산</p>
-        </div>
-        <div class="arrow">→</div>
-        <div class="logic-step">
-          <span class="icon">📈</span>
-          <strong>가중치 알고리즘</strong>
-          <p>리듬별 구간 매칭</p>
-        </div>
-        <div class="arrow">→</div>
-        <div class="logic-step">
-          <span class="icon">✨</span>
-          <strong>번호 추출</strong>
-          <p>나만의 행운 조합</p>
-        </div>
+        <aside class="hero-panel">
+          <div class="metric-card">
+            <p class="metric-label">직전 회차 1등 예상 실수령액</p>
+            <p id="latest-net-amount" class="metric-value">최신 데이터를 불러오는 중입니다.</p>
+            <p id="latest-jackpot-meta" class="metric-meta">회차 정보와 세전 당첨금이 여기에 표시됩니다.</p>
+          </div>
+          <div class="editorial-note">
+            <h2>이 페이지에서 바로 할 수 있는 일</h2>
+            <p>생년월일을 기반으로 오늘의 바이오리듬을 확인하고, 그 결과를 참고용 가중치로 반영한 번호 조합을 생성할 수 있습니다. 이어서 같은 페이지에서 최근 회차 조회와 당첨판매점 조회까지 연결해 볼 수 있어, 기능과 설명을 한 흐름으로 이용할 수 있습니다.</p>
+          </div>
+        </aside>
       </div>
     </section>
 
-    <section class="card" id="biorhythm-card">
-      <div class="card-header">
-        <h2>1. 나의 오늘 바이오리듬 분석</h2>
-        <span class="badge">STEP 01</span>
-      </div>
-      <p class="section-desc">생년월일 8자리를 입력하여 오늘의 신체, 감성, 지성 에너지를 확인하세요.</p>
-      <div class="controls row-wrap">
-        <label for="birth-date-simple">생년월일</label>
-        <input type="text" id="birth-date-simple" inputmode="numeric" placeholder="예: 19940321" maxlength="10" />
-        <button id="calc-bio-btn" type="button" class="btn-primary">리듬 분석하기</button>
-      </div>
-      <div class="controls row-wrap" style="margin-top: 8px;">
-        <label>연동 가중치 강도</label>
-        <div class="radio-group">
-          <label><input type="radio" name="bio-strength" value="weak"> 약하게</label>
-          <label><input type="radio" name="bio-strength" value="medium" checked> 중간</label>
-          <label><input type="radio" name="bio-strength" value="strong"> 강하게</label>
+    <div class="container page-stack">
+      <section class="content-section intro-section" id="service-intro">
+        <div class="section-heading">
+          <p class="section-kicker">서비스 소개</p>
+          <h2>로또리듬은 무엇을 보여주는 사이트인가</h2>
         </div>
-      </div>
-      <div id="biorhythm-result" class="result-box">생년월일을 입력하면 리듬 분석 그래프가 나타납니다.</div>
-    </section>
-
-    <section class="card secondary-focus" id="generator-card">
-      <div class="card-header">
-        <h2>2. 리듬 연동 번호 생성</h2>
-        <span class="badge">STEP 02</span>
-      </div>
-      <p class="section-desc">분석된 리듬 가중치를 반영한 6개 번호 조합을 추출합니다.</p>
-      <div class="controls row-wrap">
-        <label>생성 세트 수
-          <select id="set-count">
-            <option value="1">1세트</option>
-            <option value="3" selected>3세트</option>
-            <option value="5">5세트</option>
-            <option value="10">10세트</option>
-          </select>
-        </label>
-        <button id="generate-btn" class="btn-primary" style="background: var(--brand-2);">리듬 기반 번호 생성</button>
-        <button id="reset-options-btn" type="button" class="btn-outline">초기화</button>
-      </div>
-      <p id="generator-message" class="updated-note">먼저 리듬 분석을 완료하면 가중치가 자동으로 적용됩니다.</p>
-      <ul id="generated-list" class="number-list"></ul>
-    </section>
-
-    <section class="card" id="draw-card">
-      <div class="card-header">
-        <h2>지난 회차 당첨번호 조회</h2>
-      </div>
-      <div class="controls row-wrap">
-        <button id="load-latest-btn" class="btn-small">최신 회차 불러오기</button>
-        <label for="draw-no">회차 번호</label>
-        <input type="number" id="draw-no" min="1" placeholder="예: 1150" />
-        <button id="check-draw-btn">조회</button>
-      </div>
-      <div id="draw-result" class="result-box">회차를 입력해 당첨 결과를 확인하세요.</div>
-    </section>
-
-    <section class="card" id="store-card">
-      <div class="card-header">
-        <h2>1등 당첨판매점 조회</h2>
-      </div>
-      <div class="controls row-wrap">
-        <label for="store-draw-no">회차 번호</label>
-        <input type="number" id="store-draw-no" min="1" placeholder="예: 1150" />
-        <button id="store-search-btn">판매점 조회</button>
-      </div>
-      <div id="store-result" class="result-box">회차별 1등 배출 명당을 확인하세요.</div>
-    </section>
-
-    <section class="card" id="how-it-works">
-      <div class="card-header">
-        <h2>PROPRIETARY LOGIC: HMD-V2 SYSTEM</h2>
-        <span class="badge" style="background: #1e293b;">CONFIDENTIAL</span>
-      </div>
-      <p class="section-desc">로또리듬의 <strong>하모닉 분산 가중치(HMD-V2)</strong> 알고리즘은 대외비 로직으로 관리되며, 분석 단계별 고유 연산 과정을 통해 최적의 조합을 산출합니다.</p>
-      <div class="how-grid">
-        <div class="how-item">
-          <div class="how-head p">Phase 01: Wave Mapping</div>
-          <p>사용자의 생체 에너지를 3대 하모닉 파동으로 치환하여 1~45 전 구간의 주파수 대역을 매핑합니다.</p>
+        <div class="prose-grid two-col">
+          <article>
+            <p>로또리듬은 로또 번호를 둘러싼 여러 정보를 한데 모아 읽기 쉽게 정리한 정적 정보 사이트입니다. 사용자는 최신 회차의 당첨번호와 1등 당첨금, 판매점 정보 같은 기본 데이터를 확인할 수 있고, 동시에 번호 분포나 홀짝 구성처럼 자주 언급되는 통계 관찰 주제를 함께 살펴볼 수 있습니다. 기능만 덩그러니 놓인 페이지가 아니라, 왜 이 정보가 보이는지와 어떻게 읽어야 하는지를 문장으로 안내하는 것이 이 사이트의 핵심입니다.</p>
+            <p>특히 바이오리듬 기반 번호 생성은 예측 서비스가 아니라 놀이형 해석 콘텐츠로 배치했습니다. 사용자가 자신의 생년월일을 입력하면 신체, 감성, 지성 리듬을 바탕으로 현재 상태를 시각적으로 확인하고, 그 리듬을 참고 가중치로 활용한 번호 조합을 만들어 볼 수 있습니다. 이 결과는 당첨 확률 향상을 약속하는 수단이 아니라, 무작위 번호 생성에 개인화된 재미를 더하는 도구로 이해하는 편이 적절합니다.</p>
+          </article>
+          <article>
+            <p>이 사이트는 다음과 같은 사용자에게 잘 맞습니다. 최근 회차와 판매점 정보를 한 번에 보고 싶은 사람, 통계를 과장 없이 읽는 방법을 알고 싶은 사람, 자동번호와는 다른 방식의 놀이형 번호 생성을 경험해 보고 싶은 사람, 그리고 로또 관련 정보를 지나친 선전 문구 없이 차분하게 살펴보고 싶은 사람에게 적합합니다. 숫자를 해석하는 기준을 스스로 세우고 싶은 사용자라면, 기능보다 설명이 함께 있는 구조가 더 도움이 됩니다.</p>
+            <p>홈 화면 아래에는 서비스 소개, 바이오리듬 해설, 번호 생성 방식 설명, 로또 데이터 읽는 법, 통계 인사이트, 책임 있는 이용 안내, FAQ를 순서대로 배치했습니다. 필요한 기능만 바로 사용할 수도 있고, 먼저 설명을 읽고 서비스의 한계와 성격을 파악한 뒤 도구를 이용할 수도 있습니다. 더 자세한 글이 필요하면 <a href="/guides.html">가이드 허브</a>와 <a href="/faq.html">FAQ 전체판</a>으로 이동해 내용을 이어서 볼 수 있습니다.</p>
+          </article>
         </div>
-        <div class="how-item">
-          <div class="how-head e">Phase 02: Modulo Grouping</div>
-          <p>숫자 간 간섭을 최소화하는 고유 모듈로(Modulo) 연산을 통해 추출 확률 밀도를 전 대역에 분산 배치합니다.</p>
-        </div>
-        <div class="how-item">
-          <div class="how-head i">Phase 03: Prime Calibration</div>
-          <p>비선형적 무작위성 속에서 유의미한 패턴을 가진 특수 수치 대역을 분석하여 추출 강도를 미세 조정합니다.</p>
-        </div>
-        <div class="how-item">
-          <div class="how-head o">Data Backtracking</div>
-          <p>역대 1,200회 이상의 당첨 데이터와 생성 조합을 교차 검증하여 현재 리듬과의 상대적 합치도를 산출합니다.</p>
-        </div>
-      </div>
-      <p class="updated-note" style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; opacity: 0.6;">
-        * 본 알고리즘의 세부 수식은 기업 비밀로 보호받으며, 무단 복제 및 상업적 이용을 금합니다.
-      </p>
-    </section>
+      </section>
 
-    <section class="info-grid">
-      <article class="info-card">
-        <h3>데이터 출처</h3>
-        <p>당첨번호 및 판매점 정보는 동행복권 공식 데이터를 기준으로 제공합니다.</p>
-      </article>
-      <article class="info-card">
-        <h3>면책 안내</h3>
-        <p>로또리듬의 알고리즘은 재미와 참고용이며 당첨을 보장하지 않습니다.</p>
-      </article>
-    </section>
+      <section class="content-section" id="biorhythm-explainer">
+        <div class="section-heading">
+          <p class="section-kicker">바이오리듬 이해</p>
+          <h2>바이오리듬은 어떤 개념이며 이 사이트에서는 어떻게 활용하는가</h2>
+        </div>
+        <div class="prose-grid two-col">
+          <article>
+            <p>일반적으로 바이오리듬은 사람의 상태를 일정한 주기의 리듬으로 해석해 보는 개념으로 소개됩니다. 흔히 신체 리듬은 활동성과 체력의 변화를, 감성 리듬은 기분과 정서의 흐름을, 지성 리듬은 집중력과 판단 감각의 변화를 상징적으로 설명할 때 사용됩니다. 실제 생활에서는 과학적 진단 도구라기보다 컨디션을 비유적으로 살펴보는 언어로 받아들이는 경우가 많습니다.</p>
+            <p>로또리듬은 바로 이 지점을 활용합니다. 생년월일 입력값을 바탕으로 오늘의 신체, 감성, 지성 리듬을 계산해 간단한 시각화로 보여 주고, 그 결과를 번호 생성의 내부 가중치 중 하나로 반영합니다. 즉, 오늘의 리듬 상태를 하나의 테마로 삼아 숫자 조합을 만들어 보는 방식입니다. 사용자는 이를 통해 같은 무작위 번호 생성이라도 조금 더 개인화된 놀이 경험을 얻을 수 있습니다.</p>
+          </article>
+          <article>
+            <p>다만 중요한 점은, 이 과정이 과학적 예측 모델이나 당첨률 향상 장치로 제시되지 않는다는 것입니다. 로또의 추첨 결과는 독립적인 무작위 사건으로 이해해야 하며, 어떤 리듬 해석도 미래 결과를 보장하지 않습니다. 로또리듬은 바이오리듬을 해석형 콘텐츠로 다루며, 사용자가 숫자를 바라보는 재미있는 관점을 하나 더 제공하는 데 초점을 둡니다.</p>
+            <p>이 서비스의 바이오리듬 설명을 더 자세히 읽고 싶다면 <a href="/guide-biorhythm.html">바이오리듬 가이드</a>를 함께 참고해 보세요. 개념의 배경, 사이트 내 활용 방식, 과도한 해석을 피해야 하는 이유를 별도 문서로 정리해 두었습니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="tool-section card" id="biorhythm-card">
+        <div class="card-header">
+          <div>
+            <p class="section-kicker">기능 1</p>
+            <h2>오늘의 바이오리듬 분석</h2>
+          </div>
+          <span class="badge">STEP 01</span>
+        </div>
+        <p class="section-desc">생년월일 8자리를 입력하면 신체, 감성, 지성 리듬을 시각적으로 보여 줍니다. 이 결과는 뒤의 번호 생성 단계에서 참고용 가중치로 연결됩니다.</p>
+        <div class="controls row-wrap">
+          <label for="birth-date-simple">생년월일</label>
+          <input type="text" id="birth-date-simple" inputmode="numeric" placeholder="예: 19940321" maxlength="10" />
+          <button id="calc-bio-btn" type="button" class="btn-primary">리듬 분석하기</button>
+        </div>
+        <div class="controls row-wrap subtle-gap">
+          <label>연동 강도</label>
+          <div class="radio-group">
+            <label><input type="radio" name="bio-strength" value="weak"> 약하게</label>
+            <label><input type="radio" name="bio-strength" value="medium" checked> 중간</label>
+            <label><input type="radio" name="bio-strength" value="strong"> 강하게</label>
+          </div>
+        </div>
+        <div class="guide-copy compact">
+          <p>여기에 표시되는 그래프는 오늘 기준의 리듬 흐름을 보여 주는 참고 화면입니다. 값이 높거나 낮다고 해서 실제 추첨 결과에 직접적인 영향을 준다고 볼 수는 없습니다. 다만 사용자가 번호를 선택할 때 하나의 해석 기준으로 삼을 수 있도록 구성했습니다.</p>
+        </div>
+        <div id="biorhythm-result" class="result-box">
+          <p class="result-title">분석 전 안내</p>
+          <p>생년월일을 입력하면 오늘의 바이오리듬 그래프와 종합 리듬 수치가 여기에 표시됩니다. 분석 결과는 개인화된 해석용 정보이며, 이어지는 번호 생성 단계에서 참고용으로만 반영됩니다.</p>
+        </div>
+      </section>
+
+      <section class="content-section" id="generator-method">
+        <div class="section-heading">
+          <p class="section-kicker">번호 생성 방식 설명</p>
+          <h2>입력값과 무작위성을 함께 반영하는 참고용 조합 생성</h2>
+        </div>
+        <div class="prose-grid two-col">
+          <article>
+            <p>번호 생성 단계는 사용자의 입력값에서 계산된 리듬 결과를 내부 가중치로 반영하면서도, 기본적으로 무작위 숫자 선택의 성격을 유지하도록 설계되어 있습니다. 다시 말해 생년월일로 계산된 리듬이 숫자 구간의 우선순위에 일부 영향을 줄 수는 있지만, 결과 전체를 고정된 방식으로 결정하지는 않습니다. 이 때문에 같은 사용자가 비슷한 시점에 여러 번 실행하더라도 결과는 매번 달라질 수 있습니다.</p>
+            <p>이런 구조는 예측보다 관찰과 놀이에 가깝습니다. 사용자는 생성된 숫자를 보며 홀짝 구성이나 번호대 분포를 함께 살펴볼 수 있고, 자신이 선호하는 패턴과 어떻게 다른지 비교할 수 있습니다. 자동번호처럼 완전히 즉시 추출된 결과와 달리, 이 사이트는 번호를 둘러싼 설명과 맥락을 함께 제시한다는 점에서 차이가 있습니다.</p>
+          </article>
+          <article>
+            <p>중요한 점은, 내부 가중치가 들어간다고 해서 실제 확률이 높아진다고 단정할 수 없다는 것입니다. 로또의 추첨 확률은 각 번호 조합에 대해 동일하게 다뤄야 하며, 어떤 방식의 해석도 당첨 가능성을 보장하지 않습니다. 로또리듬은 이를 명시적으로 안내하면서, 사용자가 숫자 선택 과정을 조금 더 흥미롭게 경험하도록 돕는 방향을 택합니다.</p>
+            <p>이용 흐름과 세부 화면 설명이 더 필요하다면 <a href="/guide-how-to-use.html">사용법 가이드</a>에서 처음 입력부터 회차 조회, 판매점 조회까지 단계별로 확인할 수 있습니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="tool-section card emphasis-card" id="generator-card">
+        <div class="card-header">
+          <div>
+            <p class="section-kicker">기능 2</p>
+            <h2>리듬 연동 번호 생성기</h2>
+          </div>
+          <span class="badge alt">STEP 02</span>
+        </div>
+        <p class="section-desc">분석된 리듬을 참고 가중치로 반영해 6개 번호 조합을 생성합니다. 결과는 참고와 재미 목적의 조합이며 실제 당첨을 보장하지 않습니다.</p>
+        <div class="controls row-wrap">
+          <label>생성 세트 수
+            <select id="set-count">
+              <option value="1">1세트</option>
+              <option value="3" selected>3세트</option>
+              <option value="5">5세트</option>
+              <option value="10">10세트</option>
+            </select>
+          </label>
+          <button id="generate-btn" class="btn-primary alt-bg">번호 조합 생성</button>
+          <button id="reset-options-btn" type="button" class="btn-outline">초기화</button>
+        </div>
+        <p id="generator-message" class="updated-note">먼저 위 단계에서 바이오리듬을 분석하면 해당 결과가 참고용 가중치로 연결됩니다.</p>
+        <ul id="generated-list" class="number-list"></ul>
+        <div class="guide-copy compact muted-box">
+          <p>생성된 조합 옆의 점수는 사이트 내부 기준에 따라 현재 리듬과의 상대적 조화를 표현한 참고 값입니다. 확률 우위나 당첨 가능성 상승을 뜻하지 않으며, 사용자가 여러 조합을 비교할 때 보조 지표로만 활용할 수 있습니다.</p>
+        </div>
+      </section>
+
+      <section class="content-section" id="lotto-data-reading">
+        <div class="section-heading">
+          <p class="section-kicker">로또 데이터 읽는 법</p>
+          <h2>회차와 번호, 보너스번호, 당첨금, 판매점 정보를 함께 보는 이유</h2>
+        </div>
+        <div class="article-grid three-col">
+          <article class="info-card detailed">
+            <h3>회차 번호</h3>
+            <p>회차 번호는 추첨이 몇 번째로 진행된 결과인지 보여 주는 기준입니다. 특정 번호 패턴을 이야기할 때는 반드시 같은 회차 기준인지 먼저 확인해야 합니다. 회차를 알면 날짜와 결과를 함께 추적하기가 쉬워집니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3>당첨번호와 보너스번호</h3>
+            <p>당첨번호 6개는 실제 추첨의 기본 결과이고, 보너스번호는 2등 판별에 사용되는 별도 숫자입니다. 번호를 비교할 때는 보너스번호를 본 번호와 같은 의미로 혼동하지 않는 것이 중요합니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3>1등 당첨금</h3>
+            <p>홈 화면 상단에는 최근 회차의 세전 당첨금과 예상 실수령액이 함께 표시됩니다. 당첨금은 회차마다 판매량과 당첨자 수에 따라 크게 달라질 수 있어, 단순 숫자보다 맥락을 같이 보는 편이 좋습니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3>판매점 정보</h3>
+            <p>판매점 목록은 특정 회차의 1등 배출점 정보를 모아 보는 기능입니다. 특정 지역이나 판매점이 반복적으로 언급되더라도 그것이 미래 결과를 보장하는 신호는 아니며, 과거 데이터의 기록으로 이해해야 합니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3>날짜와 추세</h3>
+            <p>같은 번호라도 어느 시점에 나왔는지, 연속 번호가 포함됐는지, 홀짝이 어떻게 나뉘었는지에 따라 읽는 방식이 달라집니다. 로또 데이터는 개별 회차보다 여러 회차를 이어서 볼 때 더 풍부하게 읽힙니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3>설명과 도구의 결합</h3>
+            <p>이 사이트는 조회 결과만 보여 주는 대신, 결과 주변에 설명 문단을 넣어 비어 있는 도구 화면처럼 보이지 않도록 했습니다. 처음 방문한 사용자도 무엇을 보고 있는지 이해할 수 있게 하기 위한 설계입니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="tool-section card" id="draw-card">
+        <div class="card-header">
+          <div>
+            <p class="section-kicker">기능 3</p>
+            <h2>지난 회차 당첨번호 조회</h2>
+          </div>
+        </div>
+        <p class="section-desc">최신 회차를 불러오거나 원하는 회차를 직접 입력해 당첨번호, 보너스번호, 1등 당첨금 정보를 확인할 수 있습니다.</p>
+        <div class="controls row-wrap">
+          <button id="load-latest-btn" class="btn-small">최신 회차 불러오기</button>
+          <label for="draw-no">회차 번호</label>
+          <input type="number" id="draw-no" min="1" placeholder="예: 1150" />
+          <button id="check-draw-btn" class="btn-primary">조회</button>
+        </div>
+        <div class="guide-copy compact">
+          <p>이 박스에는 선택한 회차의 추첨일, 당첨번호 6개, 보너스번호, 1등 당첨금과 당첨자 수가 표시됩니다. 최신 회차 버튼을 누르면 가장 최근 데이터가 입력창과 결과 박스에 함께 반영됩니다.</p>
+        </div>
+        <div id="draw-result" class="result-box">
+          <p class="result-title">조회 전 안내</p>
+          <p>회차를 입력하면 결과가 여기에 표시됩니다. 당첨번호와 보너스번호는 번호색으로 구분되어 보이고, 1등 당첨금과 당첨자 수까지 함께 확인할 수 있습니다.</p>
+        </div>
+      </section>
+
+      <section class="tool-section card" id="store-card">
+        <div class="card-header">
+          <div>
+            <p class="section-kicker">기능 4</p>
+            <h2>1등 당첨판매점 조회</h2>
+          </div>
+        </div>
+        <p class="section-desc">특정 회차의 1등 배출 판매점 목록을 조회해 자동 또는 수동 여부, 상호명, 주소를 한 번에 확인할 수 있습니다.</p>
+        <div class="controls row-wrap">
+          <label for="store-draw-no">회차 번호</label>
+          <input type="number" id="store-draw-no" min="1" placeholder="예: 1150" />
+          <button id="store-search-btn" class="btn-primary">판매점 조회</button>
+        </div>
+        <div class="guide-copy compact">
+          <p>판매점 정보는 과거 회차의 기록을 보여 주는 참고 자료입니다. 특정 판매점이 반복적으로 등장해도 미래 회차의 결과를 시사하는 근거로 해석하기보다는, 지역 분포와 판매 방식의 기록으로 보는 편이 적절합니다.</p>
+        </div>
+        <div id="store-result" class="result-box">
+          <p class="result-title">조회 전 안내</p>
+          <p>조회 결과에는 해당 회차에서 1등이 나온 판매점 목록이 표시됩니다. 자동, 수동, 반자동 여부와 상호명, 주소가 정리되어 나타납니다.</p>
+        </div>
+      </section>
+
+      <section class="content-section" id="stats-insight">
+        <div class="section-heading">
+          <p class="section-kicker">로또 통계 인사이트</p>
+          <h2>통계는 예측이 아니라 관찰이라는 점을 전제로 읽기</h2>
+        </div>
+        <div class="article-grid two-col wide-gap">
+          <article class="insight-card">
+            <h3>홀짝 분포 관찰</h3>
+            <p>많은 사용자가 가장 먼저 보는 통계가 홀짝 분포입니다. 예를 들어 3:3, 4:2, 2:4 같은 비율이 얼마나 자주 보였는지 확인하면 최근 회차 흐름을 직관적으로 볼 수 있습니다. 하지만 이런 분포는 과거에 자주 보였다는 사실을 보여 줄 뿐, 다음 회차에서 다시 반복될 확률을 보장하지는 않습니다.</p>
+          </article>
+          <article class="insight-card">
+            <h3>번호대 분포</h3>
+            <p>1~10, 11~20, 21~30, 31~40, 41~45처럼 번호대를 나누어 보면 어떤 구간이 한동안 많이 보였는지, 혹은 적게 보였는지 살펴볼 수 있습니다. 사용자는 이 정보를 통해 자신이 지나치게 한 구간에 몰린 조합을 선호하는지 되돌아볼 수 있습니다.</p>
+          </article>
+          <article class="insight-card">
+            <h3>연속번호 출현 여부</h3>
+            <p>연속번호는 실제로 종종 등장하지만, 체감상 드물게 느껴져 과소평가되기 쉽습니다. 과거 데이터에서 연속번호가 어떻게 나왔는지 확인하면 숫자 선택에서 지나친 배제를 줄이는 데 도움이 될 수 있습니다. 다만 이것 역시 관찰일 뿐, 특정 패턴의 재등장을 예고하지는 않습니다.</p>
+          </article>
+          <article class="insight-card">
+            <h3>자주 나온 번호와 오래 안 나온 번호</h3>
+            <p>출현 빈도가 높은 번호와 오랫동안 나오지 않은 번호는 늘 관심을 끄는 주제입니다. 하지만 많이 나온 번호가 곧 피해야 할 번호도 아니고, 오래 쉬었다고 해서 다음 차례가 보장되는 것도 아닙니다. 이 통계는 번호에 대한 사용자 인식을 정리하는 자료로 받아들이는 편이 정확합니다.</p>
+          </article>
+        </div>
+        <div class="guide-copy long-form">
+          <p>로또 통계는 숫자의 움직임을 이해하는 언어를 제공하지만, 그 자체가 예측 기계가 되지는 않습니다. 이 사이트는 통계를 관찰의 재료로 제시합니다. 사용자는 자주 언급되는 패턴을 이해하고, 자동번호나 임의 선택과 비교하며 자신만의 관찰 기준을 세울 수 있습니다. 통계와 예측의 차이를 더 깊게 읽고 싶다면 <a href="/guide-lotto-stats.html">로또 통계 가이드</a>에서 대표적인 오해와 읽는 법을 확인해 보세요.</p>
+        </div>
+      </section>
+
+      <section class="content-section" id="responsible-play">
+        <div class="section-heading">
+          <p class="section-kicker">책임 있는 이용 안내</p>
+          <h2>재미와 참고를 위한 이용 원칙</h2>
+        </div>
+        <div class="prose-grid two-col">
+          <article>
+            <p>로또리듬은 이용자에게 과몰입을 권하지 않습니다. 번호를 생성하고 데이터를 확인하는 과정이 흥미롭게 느껴질 수는 있지만, 복권 구매는 항상 예산 범위 안에서 스스로 통제할 수 있는 수준으로 이뤄져야 합니다. 데이터를 많이 본다고 해서 결과를 통제할 수 있게 되는 것은 아니므로, 이용 빈도와 구매 빈도를 분리해서 생각하는 태도가 필요합니다.</p>
+            <p>또한 사이트에서 제공하는 바이오리듬 해석이나 통계 설명은 의사결정을 보조하는 참고 자료일 뿐입니다. 실제 구매 여부와 금액 결정은 전적으로 사용자 책임 아래 이뤄져야 하며, 감정적인 확신이나 과장된 문구에 기대어 판단하는 것은 바람직하지 않습니다.</p>
+          </article>
+          <article>
+            <p>복권은 재미 성격의 상품이며, 지속적인 손실을 감수하면서까지 반복 구매할 이유가 되지 않습니다. 미성년자는 관련 법령과 정책에 따라 이용 대상이 아니며, 성인 사용자 역시 무리한 지출을 피하는 것이 중요합니다. 필요하다면 예산을 먼저 정한 뒤, 사이트의 정보와 도구는 그 범위 안에서만 참고하는 방식이 적절합니다.</p>
+            <p>사이트 운영 방향과 면책 기준은 <a href="/about.html">사이트 소개</a>와 <a href="/terms.html">이용약관</a> 페이지에도 정리해 두었습니다. 서비스 성격을 충분히 이해한 뒤 사용하는 편이 가장 안전합니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="content-section faq-section" id="faq-preview">
+        <div class="section-heading">
+          <p class="section-kicker">FAQ</p>
+          <h2>자주 받는 질문</h2>
+        </div>
+        <div class="faq-list">
+          <article class="faq-item">
+            <h3>바이오리듬 번호는 당첨 확률을 높여주나요?</h3>
+            <p>아닙니다. 이 사이트의 바이오리듬 번호 생성은 재미와 참고를 위한 해석형 도구입니다. 특정 조합의 당첨 확률을 높여준다고 볼 수 없으며, 어떤 결과도 보장하지 않습니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>오늘 기준 데이터는 어떻게 확인하나요?</h3>
+            <p>홈 화면의 최신 회차 불러오기 기능을 사용하면 현재 연결 가능한 최신 회차 정보가 입력창과 결과 영역에 반영됩니다. 상단의 실수령액 패널도 같은 기준의 최신 회차를 참조합니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>번호 생성 결과는 매번 달라지나요?</h3>
+            <p>그럴 수 있습니다. 리듬 결과를 참고하더라도 기본적으로 무작위성이 함께 반영되기 때문에 동일한 입력에서도 다른 조합이 생성될 수 있습니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>판매점 정보는 어디 기준인가요?</h3>
+            <p>사이트 내 판매점 조회는 회차별 1등 배출점 정보를 기준으로 정리합니다. 이는 과거 기록을 확인하는 기능이며, 특정 판매점의 미래 당첨 가능성을 뜻하지 않습니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>왜 통계와 예측은 다른가요?</h3>
+            <p>통계는 이미 발생한 결과를 정리한 자료이고, 예측은 아직 일어나지 않은 결과를 미리 맞히려는 시도입니다. 로또 데이터는 통계를 통해 읽을 수 있지만, 그 자체로 미래 추첨을 확정할 수는 없습니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>자동번호와 무엇이 다른가요?</h3>
+            <p>자동번호는 즉시 무작위 조합을 받는 방식에 가깝습니다. 로또리듬은 여기에 바이오리듬 해석과 설명 콘텐츠를 더해, 숫자를 고르는 과정을 조금 더 읽을거리 있는 경험으로 바꾼 것이 차이점입니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>개인정보는 저장되나요?</h3>
+            <p>생년월일 입력값은 바이오리듬 계산에 사용되지만, 사이트 소개와 개인정보처리방침에서 안내하듯 개인 식별 목적의 회원 계정 서비스는 제공하지 않습니다. 자세한 범위는 <a href="/privacy.html">개인정보처리방침</a>에서 확인할 수 있습니다.</p>
+          </article>
+          <article class="faq-item">
+            <h3>결과는 참고용인가요?</h3>
+            <p>그렇습니다. 홈의 안내 문구와 각 가이드 문서에서 반복해서 설명하듯, 모든 결과와 해설은 참고와 재미 목적입니다.</p>
+          </article>
+        </div>
+        <p class="section-tail">더 많은 질문은 <a href="/faq.html">FAQ 전체 페이지</a>에서 확인할 수 있습니다.</p>
+      </section>
+
+      <section class="content-section link-hub">
+        <div class="section-heading">
+          <p class="section-kicker">더 읽어보기</p>
+          <h2>가이드와 정책 문서 연결</h2>
+        </div>
+        <div class="article-grid three-col">
+          <article class="info-card detailed">
+            <h3><a href="/guides.html">가이드 허브</a></h3>
+            <p>서비스 사용 흐름, 바이오리듬 개념, 로또 통계 읽는 법을 한곳에서 찾아볼 수 있는 허브 페이지입니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3><a href="/guide-how-to-use.html">처음 이용하는 방법</a></h3>
+            <p>생년월일 입력부터 번호 생성, 회차 조회, 판매점 조회까지 초보자 기준으로 순서대로 설명합니다.</p>
+          </article>
+          <article class="info-card detailed">
+            <h3><a href="/about.html">운영 목적과 면책</a></h3>
+            <p>사이트가 어떤 범위의 정보를 제공하며 무엇을 약속하지 않는지 운영 기준을 읽을 수 있습니다.</p>
+          </article>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <footer class="footer">
-    <p>© 2026 LOTTO RHYTHM. All rights reserved.</p>
-    <p><a href="/privacy.html">개인정보처리방침</a> · <a href="/terms.html">이용약관</a> · <a href="/contact.html">문의</a></p>
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <p class="footer-brand">로또리듬</p>
+        <p>로또 데이터 해설, 바이오리듬 놀이형 번호 생성, 회차 및 판매점 조회를 함께 제공하는 정보형 정적 사이트입니다.</p>
+      </div>
+      <div>
+        <p class="footer-title">바로가기</p>
+        <p><a href="/guides.html">로또 데이터 가이드</a></p>
+        <p><a href="/faq.html">FAQ 전체판</a></p>
+        <p><a href="/about.html">사이트 소개</a></p>
+      </div>
+      <div>
+        <p class="footer-title">정책</p>
+        <p><a href="/privacy.html">개인정보처리방침</a></p>
+        <p><a href="/terms.html">이용약관</a></p>
+        <p><a href="/contact.html">문의 안내</a></p>
+      </div>
+    </div>
   </footer>
 
   <script defer src="/main.js"></script>

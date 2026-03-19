@@ -35,6 +35,21 @@ let currentRhythm = null;
 let historicalDraws = [];
 let isSyncing = false;
 
+const DEFAULT_BIORHYTHM_HTML = `
+  <p class="result-title">분석 전 안내</p>
+  <p>생년월일을 입력하면 오늘의 바이오리듬 그래프와 종합 리듬 수치가 여기에 표시됩니다. 분석 결과는 개인화된 해석용 정보이며, 이어지는 번호 생성 단계에서 참고용으로만 반영됩니다.</p>
+`;
+
+const DEFAULT_DRAW_HTML = `
+  <p class="result-title">조회 전 안내</p>
+  <p>회차를 입력하면 결과가 여기에 표시됩니다. 당첨번호와 보너스번호는 번호색으로 구분되어 보이고, 1등 당첨금과 당첨자 수까지 함께 확인할 수 있습니다.</p>
+`;
+
+const DEFAULT_STORE_HTML = `
+  <p class="result-title">조회 전 안내</p>
+  <p>조회 결과에는 해당 회차에서 1등이 나온 판매점 목록이 표시됩니다. 자동, 수동, 반자동 여부와 상호명, 주소가 정리되어 나타납니다.</p>
+`;
+
 function ballColor(number) {
   if (number <= 10) return "#f59e0b";
   if (number <= 20) return "#3b82f6";
@@ -129,14 +144,16 @@ function handleCalculateBiorhythm() {
       </div>
     `;
     drawBiorhythmChart(document.querySelector("#bio-canvas"), result.days);
-    generatorMessage.textContent = "패턴 분석 완료! 이제 번호를 생성하세요.";
-  } catch (error) { biorhythmResult.textContent = error.message; }
+    generatorMessage.textContent = "리듬 분석이 완료되었습니다. 참고용 번호 조합을 생성해 보세요.";
+  } catch (error) {
+    biorhythmResult.innerHTML = `<p class="result-title">입력 확인</p><p>${error.message}</p>`;
+  }
 }
 
 async function renderGeneratedSets() {
   if (!currentRhythm) { alert("먼저 STEP 01에서 리듬 분석을 진행해주세요."); return; }
   generatedList.innerHTML = "";
-  generatorMessage.textContent = "서버 알고리즘 연산 중...";
+  generatorMessage.textContent = "번호 조합을 생성하는 중입니다.";
   
   const strength = document.querySelector('input[name="bio-strength"]:checked').value;
   const setCount = Number(setCountSelect.value);
@@ -162,7 +179,7 @@ async function renderGeneratedSets() {
       li.appendChild(badge);
       generatedList.appendChild(li);
     });
-    generatorMessage.textContent = "서버 사이드 리듬 최적화 조합 추출 완료 (HMD-V2)";
+    generatorMessage.textContent = "리듬 결과를 반영한 참고용 번호 조합을 불러왔습니다.";
   } catch (e) { generatorMessage.textContent = "생성 오류: " + e.message; }
 }
 
@@ -175,7 +192,7 @@ async function requestJson(url) {
 
 async function handleCheckDraw() {
   const drawNo = drawInput.value; if (!drawNo) return;
-  drawResult.textContent = "조회 중...";
+  drawResult.innerHTML = `<p class="result-title">조회 중</p><p>선택한 회차의 당첨번호와 당첨금 정보를 불러오고 있습니다.</p>`;
   try {
     const body = await requestJson(`${API_DRAW}?drawNo=${drawNo}`);
     const d = body.data;
@@ -184,12 +201,14 @@ async function handleCheckDraw() {
     [d.drwtNo1, d.drwtNo2, d.drwtNo3, d.drwtNo4, d.drwtNo5, d.drwtNo6].forEach(n => target.appendChild(createBall(n)));
     const bLabel = document.createElement("span"); bLabel.textContent = "+"; bLabel.style.margin = "0 5px"; target.appendChild(bLabel);
     target.appendChild(createBall(d.bnusNo));
-  } catch (e) { drawResult.textContent = "조회 실패"; }
+  } catch (e) {
+    drawResult.innerHTML = `<p class="result-title">조회 실패</p><p>${e.message || "회차 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."}</p><p>회차 번호를 다시 확인하거나 최신 회차 불러오기 버튼으로 다시 시도해 보세요.</p>`;
+  }
 }
 
 async function handleStoreSearch() {
   const drawNo = storeInput.value; if (!drawNo) return;
-  storeResult.textContent = "조회 중...";
+  storeResult.innerHTML = `<p class="result-title">조회 중</p><p>선택한 회차의 1등 판매점 목록을 불러오고 있습니다.</p>`;
   try {
     const body = await requestJson(`${API_STORES}?drawNo=${drawNo}`);
     if (body.stores) {
@@ -199,7 +218,9 @@ async function handleStoreSearch() {
         storeResult.querySelector("ul").appendChild(li);
       });
     }
-  } catch (e) { storeResult.textContent = "조회 실패"; }
+  } catch (e) {
+    storeResult.innerHTML = `<p class="result-title">조회 실패</p><p>${e.message || "판매점 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."}</p><p>회차 번호를 다시 확인한 뒤 판매점 조회를 다시 실행해 보세요.</p>`;
+  }
 }
 
 async function syncHistoricalData(latestNo) {
@@ -240,8 +261,8 @@ async function initLatestData() {
     storeInput.value = d.drwNo;
     syncHistoricalData(d.drwNo);
   } catch (e) {
-    latestNetAmount.textContent = "연결 지연";
-    latestJackpotMeta.textContent = "새로고침을 눌러주세요.";
+    latestNetAmount.textContent = "최신 회차 연결 지연";
+    latestJackpotMeta.textContent = "잠시 후 다시 시도하면 최신 실수령액 정보를 불러올 수 있습니다.";
   }
 }
 
@@ -249,7 +270,8 @@ calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
 generateBtn.addEventListener("click", renderGeneratedSets);
 resetOptionsBtn.addEventListener("click", () => {
   currentRhythm = null; generatedList.innerHTML = "";
-  biorhythmResult.innerHTML = "생년월일을 입력하면 리듬 분석 그래프가 나타납니다.";
+  generatorMessage.textContent = "먼저 위 단계에서 바이오리듬을 분석하면 해당 결과가 참고용 가중치로 연결됩니다.";
+  biorhythmResult.innerHTML = DEFAULT_BIORHYTHM_HTML;
 });
 loadLatestBtn.addEventListener("click", async () => { await initLatestData(); handleCheckDraw(); });
 checkDrawBtn.addEventListener("click", handleCheckDraw);
