@@ -8,7 +8,7 @@
   <link rel="canonical" href="/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />family=Manrope:wght@600;700;800<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />display=swap" rel="stylesheet" />
   <link href="/style.css" rel="stylesheet" />
 </head>
 <body>
@@ -30,165 +30,153 @@
     <section class="hero-shell">
       <div class="container hero-grid">
         <article class="hero-copy">
-          <p class="eyebrow">LOTTO DATA GUIDE &amp; PLAYFUL RHYTHM TOOL</p>
-          <h1>로또 데이터를 읽고, 오늘의 리듬으로 가볍게 조합해보는 사이트</h1>
-          <p class="hero-lead">최신 회차, 당첨금, 판매점, 통계를 한곳에서 확인하고 바이오리듬 기반 참고용 번호를 생성해보세요.</p>
+          <p class="eyebrow">LOTTO DATA GUIDE</p>
+          <h1>로또 데이터를 읽고<br />오늘의 리듬으로 가볍게 조합해보는 사이트</h1>
+          <p class="hero-lead">최신 회차, 판매점, 통계를 한곳에서 확인하고 바이오리듬 기반 참고용 번호를 생성해보세요.</p>
           <div class="hero-actions">
             <a class="button-link primary" href="#biorhythm-card">바이오 분석 시작</a>
-            <a class="button-link secondary" href="/guide-how-to-use.html">처음 이용하는 방법 보기</a>
+            <a class="button-link secondary" href="/guide-how-to-use.html">이용 방법 보기</a>
           </div>
-          <p class="hero-note">예측·보장 서비스가 아니라 데이터와 해석을 함께 보는 정보형 도구입니다.</p>
+          <ul class="hero-points">
+            <li>최신 회차와 실수령액 기준 정보를 바로 확인할 수 있습니다.</li>
+            <li>번호 생성과 조회 기능을 한 화면에서 이어서 사용할 수 있습니다.</li>
+            <li>데이터와 해석을 함께 보는 정보형 도구입니다.</li>
+          </ul>
         </article>
 
         <aside class="hero-panel">
-          <div class="metric-card">
+          <div class="metric-card hero-stat-card">
             <p class="metric-label">직전 회차 1등 예상 실수령액</p>
             <p id="latest-net-amount" class="metric-value">최신 데이터를 불러오는 중입니다.</p>
             <p id="latest-jackpot-meta" class="metric-meta">회차 정보와 세전 당첨금이 여기에 표시됩니다.</p>
           </div>
-          <div class="editorial-note">
-            <h2>이 페이지에서 바로 할 수 있는 일</h2>
-            <p>오늘의 리듬 확인부터 회차 조회와 판매점 조회까지 한 흐름으로 이어서 사용할 수 있습니다.</p>
+          <div class="editorial-note hero-guide-card">
+            <p class="metric-label">바로 할 수 있는 일</p>
+            <h2>분석부터 조회까지 한 흐름으로</h2>
+            <ul class="mini-list">
+              <li>생년월일 입력 후 바이오리듬 분석</li>
+              <li>참고용 번호 조합 생성</li>
+              <li>지난 회차와 1등 판매점 조회</li>
+            </ul>
           </div>
         </aside>
       </div>
     </section>
 
-    <div class="container page-stack">
-      <section class="content-section intro-section" id="service-intro">
-        <div class="section-heading">
+    <div class="container page-stack home-stack">
+      <section class="content-section section-frame" id="service-intro">
+        <div class="section-heading narrow-heading">
           <p class="section-kicker">핵심 기능</p>
-          <h2>홈에서는 바로 쓰고, 자세한 설명은 가이드에서 이어집니다</h2>
+          <h2>핵심만 빠르게 보고, 자세한 설명은 가이드에서 확인합니다</h2>
         </div>
-        <p class="section-compact-intro">홈은 기능 중심으로 짧게 구성했습니다. 개념 설명과 읽을거리는 <a href="/guides.html">가이드 허브</a>, <a href="/faq.html">FAQ</a>, <a href="/about.html">사이트 소개</a>로 이어집니다.</p>
-        <div class="article-grid three-col feature-summary-grid top-gap">
-          <article class="info-card detailed">
-            <h3>최근 회차 확인</h3>
-            <p>최신 회차와 당첨금 흐름을 빠르게 확인할 수 있습니다. 상단 패널에서 실수령액 기준 정보도 함께 봅니다.</p>
+        <div class="article-grid three-col feature-summary-grid">
+          <article class="info-card detailed feature-card">
+            <h3>최신 회차 확인</h3>
+            <p>최근 회차 번호와 당첨금 흐름을 빠르게 확인할 수 있습니다.</p>
           </article>
-          <article class="info-card detailed">
-            <h3>리듬 기반 참고용 생성</h3>
-            <p>생년월일 기반 리듬을 참고 가중치로 써서 번호 조합을 만들어 봅니다. 결과는 해석형 참고 자료입니다.</p>
+          <article class="info-card detailed feature-card">
+            <h3>바이오리듬 기반 참고용 생성</h3>
+            <p>생년월일 기반 리듬을 참고 가중치로 써서 번호 조합을 만들어 봅니다.</p>
           </article>
-          <article class="info-card detailed">
-            <h3>통계 관찰과 판매점 조회</h3>
-            <p>번호 패턴은 짧게 요약해 보고, 판매점 정보는 과거 기록으로 확인합니다. 자세한 해설은 가이드에서 이어서 읽을 수 있습니다.</p>
+          <article class="info-card detailed feature-card">
+            <h3>판매점·통계 확인</h3>
+            <p>판매점 정보와 통계 포인트를 함께 읽을 수 있습니다.</p>
           </article>
         </div>
       </section>
 
-      <section class="tool-section card" id="biorhythm-card">
-        <div class="card-header">
-          <div>
-            <p class="section-kicker">기능 1</p>
-            <h2>오늘의 바이오리듬 분석</h2>
+      <section class="article-grid two-col tool-pair">
+        <section class="tool-section card tool-card" id="biorhythm-card">
+          <div class="card-header">
+            <div>
+              <p class="section-kicker">기능 1</p>
+              <h2>오늘의 바이오리듬 분석</h2>
+            </div>
+            <span class="badge">STEP 01</span>
           </div>
-          <span class="badge">STEP 01</span>
-        </div>
-        <p class="section-desc">생년월일 8자리를 입력하면 신체, 감성, 지성 리듬을 시각적으로 보여 줍니다. 이 결과는 뒤의 번호 생성 단계에서 참고용 가중치로 연결됩니다.</p>
-        <div class="controls row-wrap">
-          <label for="birth-date-simple">생년월일</label>
-          <input type="text" id="birth-date-simple" inputmode="numeric" placeholder="예: 19940321" maxlength="10" />
-          <button id="calc-bio-btn" type="button" class="btn-primary">리듬 분석하기</button>
-        </div>
-        <div class="controls row-wrap subtle-gap">
-          <label>연동 강도</label>
-          <div class="radio-group">
-            <label><input type="radio" name="bio-strength" value="weak"> 약하게</label>
-            <label><input type="radio" name="bio-strength" value="medium" checked> 중간</label>
-            <label><input type="radio" name="bio-strength" value="strong"> 강하게</label>
+          <p class="section-desc">생년월일 8자리를 입력하면 오늘의 신체, 감성, 지성 리듬을 확인할 수 있습니다.</p>
+          <div class="controls row-wrap control-panel">
+            <label for="birth-date-simple">생년월일</label>
+            <input type="text" id="birth-date-simple" inputmode="numeric" placeholder="예: 19940321" maxlength="10" />
+            <button id="calc-bio-btn" type="button" class="btn-primary">리듬 분석하기</button>
           </div>
-        </div>
-        <div class="guide-copy compact">
-          <p>참고용 해석 화면입니다. 자세한 개념과 한계는 <a href="/guide-biorhythm.html">바이오리듬 가이드</a>에서 확인할 수 있습니다.</p>
-        </div>
-        <div id="biorhythm-result" class="result-box">
-          <p class="result-title">분석 전 안내</p>
-          <p>생년월일을 입력하면 오늘의 바이오리듬 그래프와 종합 리듬 수치가 여기에 표시됩니다. 분석 결과는 참고용 해석 정보입니다.</p>
-        </div>
-      </section>
-
-      <section class="content-section" id="generator-method">
-        <div class="section-heading">
-          <p class="section-kicker">번호 생성 방식</p>
-          <h2>입력값과 무작위성을 함께 반영한 참고용 조합</h2>
-        </div>
-        <div class="article-grid three-col compact-card-grid">
-          <article class="info-card detailed">
-            <h3>입력 반영</h3>
-            <p>생년월일에서 계산된 리듬 결과가 내부 가중치에 일부 반영됩니다.</p>
-          </article>
-          <article class="info-card detailed">
-            <h3>무작위성 유지</h3>
-            <p>같은 입력이어도 결과는 달라질 수 있으며, 확률 우위를 약속하지 않습니다.</p>
-          </article>
-          <article class="info-card detailed">
-            <h3>상세 설명 연결</h3>
-            <p><a href="/guide-how-to-use.html">사용법 가이드</a>와 <a href="/faq.html">FAQ</a>에서 이용 흐름과 자주 묻는 질문을 이어서 볼 수 있습니다.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="tool-section card emphasis-card" id="generator-card">
-        <div class="card-header">
-          <div>
-            <p class="section-kicker">기능 2</p>
-            <h2>리듬 연동 번호 생성기</h2>
+          <div class="controls row-wrap subtle-gap control-panel light-panel">
+            <label>연동 강도</label>
+            <div class="radio-group">
+              <label><input type="radio" name="bio-strength" value="weak"> 약하게</label>
+              <label><input type="radio" name="bio-strength" value="medium" checked> 중간</label>
+              <label><input type="radio" name="bio-strength" value="strong"> 강하게</label>
+            </div>
           </div>
-          <span class="badge alt">STEP 02</span>
-        </div>
-        <p class="section-desc">분석된 리듬을 참고 가중치로 반영해 6개 번호 조합을 생성합니다. 결과는 참고와 재미 목적의 조합이며 실제 당첨을 보장하지 않습니다.</p>
-        <div class="controls row-wrap">
-          <label>생성 세트 수
-            <select id="set-count">
-              <option value="1">1세트</option>
-              <option value="3" selected>3세트</option>
-              <option value="5">5세트</option>
-              <option value="10">10세트</option>
-            </select>
-          </label>
-          <button id="generate-btn" class="btn-primary alt-bg">번호 조합 생성</button>
-          <button id="reset-options-btn" type="button" class="btn-outline">초기화</button>
-        </div>
-        <p id="generator-message" class="updated-note">먼저 위 단계에서 바이오리듬을 분석하면 해당 결과가 참고용 가중치로 연결됩니다.</p>
-        <ul id="generated-list" class="number-list"></ul>
-        <div class="guide-copy compact muted-box">
-          <p>생성 점수는 내부 참고 지표입니다. 자세한 이용 흐름은 <a href="/guide-how-to-use.html">사이트 사용법</a>에서 확인할 수 있습니다.</p>
-        </div>
+          <p class="inline-guide"><a href="/guide-biorhythm.html">바이오리듬 가이드</a>에서 자세한 개념을 확인할 수 있습니다.</p>
+          <div id="biorhythm-result" class="result-box">
+            <p class="result-title">분석 전 안내</p>
+            <p>생년월일을 입력하면 오늘의 바이오리듬 그래프와 종합 리듬 수치가 여기에 표시됩니다.</p>
+          </div>
+        </section>
+
+        <section class="tool-section card tool-card emphasis-card" id="generator-card">
+          <div class="card-header">
+            <div>
+              <p class="section-kicker">기능 2</p>
+              <h2>리듬 연동 번호 생성기</h2>
+            </div>
+            <span class="badge alt">STEP 02</span>
+          </div>
+          <p class="section-desc">분석된 리듬을 참고 가중치로 반영해 6개 번호 조합을 생성합니다.</p>
+          <div class="controls row-wrap control-panel">
+            <label>생성 세트 수
+              <select id="set-count">
+                <option value="1">1세트</option>
+                <option value="3" selected>3세트</option>
+                <option value="5">5세트</option>
+                <option value="10">10세트</option>
+              </select>
+            </label>
+            <button id="generate-btn" class="btn-primary alt-bg">번호 조합 생성</button>
+            <button id="reset-options-btn" type="button" class="btn-outline">초기화</button>
+          </div>
+          <p id="generator-message" class="updated-note">먼저 위 단계에서 바이오리듬을 분석하면 참고용 가중치가 연결됩니다.</p>
+          <ul id="generated-list" class="number-list result-list"></ul>
+          <div class="inline-card muted-box">
+            <p><a href="/guide-how-to-use.html">사이트 사용법</a>에서 자세한 이용 흐름을 확인할 수 있습니다.</p>
+          </div>
+        </section>
       </section>
 
-      <section class="content-section" id="lotto-data-reading">
-        <div class="section-heading">
-          <p class="section-kicker">로또 데이터 읽는 법</p>
-          <h2>홈에서는 회차와 번호, 당첨금, 판매점 정보를 함께 읽습니다</h2>
+      <section class="content-section section-frame" id="stats-insight">
+        <div class="section-heading narrow-heading">
+          <p class="section-kicker">통계 인사이트</p>
+          <h2>자주 보는 패턴만 짧게 요약합니다</h2>
         </div>
-        <div class="article-grid two-col wide-gap">
-          <article class="info-card detailed">
-            <h3>회차와 번호</h3>
-            <p>회차 번호는 날짜와 결과를 묶어 보는 기준이고, 보너스번호는 본 번호와 구분해서 읽어야 합니다.</p>
+        <div class="article-grid stats-grid">
+          <article class="insight-card">
+            <h3>홀짝 분포</h3>
+            <p>자주 언급되는 비율이 있지만, 다음 회차를 보장하는 규칙으로 볼 수는 없습니다.</p>
           </article>
-          <article class="info-card detailed">
-            <h3>당첨금과 실수령액</h3>
-            <p>1등 당첨금은 회차별로 다르며, 상단 패널에서는 최근 회차 기준의 예상 실수령액을 함께 보여 줍니다.</p>
+          <article class="insight-card">
+            <h3>번호대 분포</h3>
+            <p>어느 구간이 최근 많이 보였는지 확인할 수 있지만, 다음 흐름을 단정할 근거는 아닙니다.</p>
           </article>
-          <article class="info-card detailed">
-            <h3>판매점 정보</h3>
-            <p>판매점 목록은 과거 기록 확인용 데이터입니다. 미래 결과를 뜻하는 신호로 해석하지 않는 편이 적절합니다.</p>
+          <article class="insight-card">
+            <h3>연속번호</h3>
+            <p>드물어 보여도 실제로는 종종 등장합니다. 배제보다 관찰 대상으로 보는 편이 낫습니다.</p>
           </article>
-          <article class="info-card detailed">
-            <h3>통계 읽기</h3>
-            <p>홀짝 분포, 번호대 분포, 연속번호 여부는 예측이 아니라 관찰 포인트로 보는 것이 정확합니다.</p>
+          <article class="insight-card">
+            <h3>빈도 통계</h3>
+            <p>자주 나온 번호와 오래 안 나온 번호 모두 기록일 뿐, 공식처럼 받아들이면 곤란합니다.</p>
           </article>
         </div>
+        <p class="section-tail"><a href="/guide-lotto-stats.html">로또 통계 가이드</a>에서 자세한 설명을 확인할 수 있습니다.</p>
       </section>
 
-      <section class="content-section tool-overview">
-        <div class="section-heading">
+      <section class="content-section tool-overview section-frame">
+        <div class="section-heading narrow-heading">
           <p class="section-kicker">데이터 조회</p>
           <h2>회차 조회와 판매점 조회를 나란히 확인하세요</h2>
         </div>
         <div class="article-grid two-col tool-duo">
-          <section class="tool-section card" id="draw-card">
+          <section class="tool-section card tool-card" id="draw-card">
             <div class="card-header">
               <div>
                 <p class="section-kicker">기능 3</p>
@@ -196,22 +184,20 @@
               </div>
             </div>
             <p class="section-desc">원하는 회차의 번호와 1등 당첨금 정보를 확인합니다.</p>
-            <div class="controls row-wrap">
+            <div class="controls row-wrap control-panel compact-controls">
               <button id="load-latest-btn" class="btn-small">최신 회차 불러오기</button>
               <label for="draw-no">회차 번호</label>
               <input type="number" id="draw-no" min="1" placeholder="예: 1150" />
               <button id="check-draw-btn" class="btn-primary">조회</button>
             </div>
-            <div class="guide-copy compact">
-              <p>조회 전에는 결과 형식만 간단히 안내합니다.</p>
-            </div>
+            <p class="inline-guide">조회 전에는 결과 형식만 안내합니다.</p>
             <div id="draw-result" class="result-box">
               <p class="result-title">조회 전 안내</p>
               <p>회차를 입력하면 번호와 당첨금 정보가 표시됩니다.</p>
             </div>
           </section>
 
-          <section class="tool-section card" id="store-card">
+          <section class="tool-section card tool-card" id="store-card">
             <div class="card-header">
               <div>
                 <p class="section-kicker">기능 4</p>
@@ -219,14 +205,12 @@
               </div>
             </div>
             <p class="section-desc">해당 회차의 1등 배출 판매점 목록을 확인합니다.</p>
-            <div class="controls row-wrap">
+            <div class="controls row-wrap control-panel compact-controls">
               <label for="store-draw-no">회차 번호</label>
               <input type="number" id="store-draw-no" min="1" placeholder="예: 1150" />
               <button id="store-search-btn" class="btn-primary">판매점 조회</button>
             </div>
-            <div class="guide-copy compact">
-              <p>판매점 정보는 과거 회차 기준 기록입니다.</p>
-            </div>
+            <p class="inline-guide">판매점 정보는 과거 회차 기준 기록입니다.</p>
             <div id="store-result" class="result-box">
               <p class="result-title">조회 전 안내</p>
               <p>조회 결과에는 판매점 목록이 표시됩니다.</p>
@@ -235,47 +219,19 @@
         </div>
       </section>
 
-      <section class="content-section" id="stats-insight">
-        <div class="section-heading">
-          <p class="section-kicker">로또 통계 인사이트</p>
-          <h2>자주 보는 통계는 짧게 요약하고, 자세한 해설은 별도 문서로 연결합니다</h2>
-        </div>
-        <div class="article-grid two-col wide-gap">
-          <article class="insight-card">
-            <h3>홀짝 분포</h3>
-            <p>자주 언급되는 비율이 있지만, 다음 회차를 보장하는 규칙으로 볼 수는 없습니다.</p>
-          </article>
-          <article class="insight-card">
-            <h3>번호대 분포</h3>
-            <p>어느 구간이 최근 많이 보였는지 확인할 수 있지만, 그것만으로 다음 흐름을 단정할 수는 없습니다.</p>
-          </article>
-          <article class="insight-card">
-            <h3>연속번호</h3>
-            <p>드물어 보이지만 실제로는 종종 등장합니다. 배제보다는 관찰 대상으로 보는 편이 낫습니다.</p>
-          </article>
-          <article class="insight-card">
-            <h3>빈도 통계</h3>
-            <p>자주 나온 번호와 오래 안 나온 번호 모두 흥미로운 기록일 뿐, 예측 공식은 아닙니다.</p>
-          </article>
-        </div>
-        <div class="guide-copy long-form">
-          <p>자세한 설명과 오해 정리는 <a href="/guide-lotto-stats.html">로또 통계 가이드</a>에서 이어서 확인할 수 있습니다.</p>
-        </div>
-      </section>
-
-      <section class="content-section faq-section" id="faq-preview">
-        <div class="section-heading">
+      <section class="content-section section-frame faq-section" id="faq-preview">
+        <div class="section-heading narrow-heading">
           <p class="section-kicker">FAQ</p>
-          <h2>홈에서는 자주 묻는 질문 3개만 먼저 보여드립니다</h2>
+          <h2>자주 묻는 질문 3개만 먼저 보여드립니다</h2>
         </div>
-        <div class="faq-list faq-preview-grid">
+        <div class="faq-preview-grid">
           <article class="faq-item">
             <h3>바이오리듬 번호는 당첨 확률을 높여주나요?</h3>
-            <p>아닙니다. 참고와 재미를 위한 해석형 도구입니다.</p>
+            <p>아닙니다. 참고와 해석을 위한 기능이며 결과를 보장하지 않습니다.</p>
           </article>
           <article class="faq-item">
             <h3>오늘 기준 데이터는 어떻게 확인하나요?</h3>
-            <p>최신 회차 불러오기 기능과 상단 패널에서 최신 연결 데이터를 확인할 수 있습니다.</p>
+            <p>상단 실수령액 카드와 최신 회차 불러오기 기능으로 바로 확인할 수 있습니다.</p>
           </article>
           <article class="faq-item">
             <h3>번호 생성 결과는 매번 달라지나요?</h3>
@@ -289,28 +245,7 @@
         <div class="responsibility-box">
           <p class="section-kicker">책임 있는 이용 안내</p>
           <h2>예산 범위 안에서 참고용으로 이용하세요</h2>
-          <p>복권 구매는 스스로 통제할 수 있는 범위 안에서 이뤄져야 합니다. 운영 목적과 면책 기준은 <a href="/about.html">사이트 소개</a>와 <a href="/terms.html">이용약관</a>에서 확인할 수 있습니다.</p>
-        </div>
-      </section>
-
-      <section class="content-section link-hub">
-        <div class="section-heading">
-          <p class="section-kicker">더 읽어보기</p>
-          <h2>상세 설명은 가이드와 정책 문서에서 이어서 확인하세요</h2>
-        </div>
-        <div class="article-grid three-col">
-          <article class="info-card detailed">
-            <h3><a href="/guides.html">가이드 허브</a></h3>
-            <p>바이오리듬, 통계, 사용법 문서를 한곳에서 찾을 수 있습니다.</p>
-          </article>
-          <article class="info-card detailed">
-            <h3><a href="/guide-how-to-use.html">처음 이용하는 방법</a></h3>
-            <p>생년월일 입력부터 회차 조회, 판매점 조회까지 순서대로 설명합니다.</p>
-          </article>
-          <article class="info-card detailed">
-            <h3><a href="/about.html">운영 목적과 면책</a></h3>
-            <p>사이트의 정보 제공 범위와 운영 기준을 확인할 수 있습니다.</p>
-          </article>
+          <p>운영 목적과 면책 기준은 <a href="/about.html">사이트 소개</a>와 <a href="/terms.html">이용약관</a>에서 확인할 수 있습니다.</p>
         </div>
       </section>
     </div>
@@ -320,7 +255,7 @@
     <div class="container footer-grid">
       <div>
         <p class="footer-brand">로또리듬</p>
-        <p>로또 데이터 해설, 바이오리듬 놀이형 번호 생성, 회차 및 판매점 조회를 함께 제공하는 정보형 정적 사이트입니다.</p>
+        <p>회차 데이터, 판매점 정보, 통계 요약, 바이오리듬 기반 참고용 번호 생성을 함께 제공하는 정보형 정적 사이트입니다.</p>
       </div>
       <div>
         <p class="footer-title">바로가기</p>
