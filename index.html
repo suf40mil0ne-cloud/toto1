@@ -2,7 +2,7 @@
 <html class="light" lang="ko">
 <head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
   <title>로또리듬 | 당신의 바이오리듬을 적용한 자동로또번호 생성 프로젝트</title>
   <meta name="description" content="로또리듬은 최근 회차 확인, 판매점 조회, 통계 관찰, 바이오리듬 놀이형 번호 생성을 함께 제공하는 로또 데이터 가이드 사이트입니다." />
   
@@ -39,7 +39,7 @@
             "headline": ["Space Grotesk", "IBM Plex Sans KR"],
             "body": ["Inter", "IBM Plex Sans KR"],
           },
-          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          borderRadius: {"DEFAULT": "1rem", "lg": "1.5rem", "xl": "2.5rem", "full": "9999px"},
         },
       },
     }
@@ -52,9 +52,12 @@
       font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
       background-color: #f9f9f9;
       color: #1a1c1c;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
     h1, h2, h3, .font-headline {
       font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+      text-wrap: balance;
     }
     .glass-effect {
       backdrop-filter: blur(20px);
@@ -62,40 +65,65 @@
     }
     /* Legacy Ball Style for JS compatibility */
     .ball {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      color: white;
-      margin: 0 4px;
-      box-shadow: inset -3px -3px 6px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1);
+      color: white !important;
+      margin: 2px;
+      font-size: 0.9rem;
+      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
     }
+    @media (min-width: 768px) {
+      .ball { width: 40px; height: 40px; font-size: 1.1rem; margin: 0 4px; }
+    }
+
+    /* 번호 생성 결과 리스트 가독성 강화 */
     #generated-list .number-set {
       display: flex;
       align-items: center;
-      padding: 1rem;
-      background: white;
+      padding: 0.75rem;
+      background: white !important;
       border-radius: 1rem;
       margin-bottom: 0.5rem;
-      border: 1px solid #eee;
+      border: 1px solid rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      justify-content: center;
+      color: #1a1c1c !important;
     }
-    .badge {
-      padding: 0.25rem 0.75rem;
+    @media (min-width: 640px) {
+      #generated-list .number-set { padding: 1rem; justify-content: flex-start; }
+    }
+
+    #generated-list .number-set span,
+    #generated-list .number-set strong {
+      color: #1a1c1c !important;
+    }
+
+    #generated-list .number-set span:first-child {
+      color: #006c49 !important;
+      font-weight: 800;
+    }
+
+    #generated-list .number-set .badge {
+      color: white !important;
+      background-color: #10b981 !important;
+      padding: 0.25rem 0.6rem;
       border-radius: 999px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      color: white;
+      margin-left: auto;
     }
   </style>
 </head>
 <body class="bg-surface text-on-surface antialiased overflow-x-hidden">
   <!-- Top Navigation Bar -->
-  <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg shadow-sm">
-    <div class="flex justify-between items-center h-20 px-6 md:px-12 max-w-7xl mx-auto">
-      <div class="text-xl font-black text-zinc-900 font-headline tracking-tight">
+  <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-lg shadow-sm border-b border-zinc-100/50">
+    <div class="flex justify-between items-center h-16 md:h-20 px-4 md:px-12 max-w-7xl mx-auto">
+      <div class="text-lg md:text-xl font-black text-zinc-900 font-headline tracking-tight">
         로또리듬
       </div>
       <nav class="hidden md:flex items-center space-x-8">
@@ -105,38 +133,37 @@
         <a class="text-zinc-600 font-medium hover:text-emerald-500 transition-colors text-sm" href="/guides.html">가이드</a>
         <a class="text-zinc-600 font-medium hover:text-emerald-500 transition-colors text-sm" href="/faq.html">FAQ</a>
       </nav>
-      <div class="flex items-center gap-4">
-        <a href="#biorhythm-card" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2.5 rounded-full font-semibold transition-all duration-300 Active: scale-95">
-          분석 시작하기
+      <div class="flex items-center gap-2 md:gap-4">
+        <a href="#biorhythm-card" class="bg-primary hover:bg-primary-container text-on-primary px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 active:scale-95 shadow-md shadow-primary/10">
+          분석 시작
         </a>
       </div>
     </div>
-    <div class="bg-zinc-100/50 h-[1px] w-full absolute bottom-0"></div>
   </header>
 
-  <main class="pt-20">
+  <main class="pt-16 md:pt-20">
     <!-- Hero Section -->
-    <section class="relative min-h-[700px] flex items-center justify-center overflow-hidden px-6 pt-12">
+    <section class="relative min-h-[550px] md:min-h-[700px] flex items-center justify-center overflow-hidden px-4 md:px-6 pt-12 md:pt-12">
       <div class="absolute inset-0 z-0">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px]"></div>
-        <div class="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] md:w-[800px] h-[600px] md:h-[800px] bg-primary/5 rounded-full blur-[80px] md:blur-[120px]"></div>
+        <div class="absolute top-1/4 right-1/4 w-[300px] md:w-[400px] h-[300px] md:h-[400px] bg-emerald-500/10 rounded-full blur-[60px] md:blur-[100px]"></div>
       </div>
       <div class="relative z-10 max-w-5xl text-center">
-        <div class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full mb-8 border border-outline-variant/20">
-          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-          <span class="text-sm font-medium text-secondary">Data-Driven Probability Engines</span>
+        <div class="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-surface-container-low rounded-full mb-6 md:mb-8 border border-outline-variant/20 shadow-sm">
+          <span class="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-primary animate-pulse"></span>
+          <span class="text-xs md:text-sm font-medium text-secondary tracking-wide uppercase">Data-Driven Engines</span>
         </div>
-        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-8 leading-[1.2]">
-          당신의 바이오리듬을 적용한 <br/><span class="text-primary italic">자동로또번호</span> 생성 프로젝트
+        <h1 class="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight text-on-surface mb-6 md:mb-8 leading-[1.2] break-keep px-2">
+          당신의 바이오리듬을 적용한 <br class="hidden md:block"/><span class="text-primary italic">자동로또번호</span> 생성 프로젝트
         </h1>
-        <p class="text-lg md:text-xl text-secondary max-w-3xl mx-auto mb-12 leading-relaxed">
-          최신 회차, 당첨금, 판매점 정보를 확인하고 <br/>바이오리듬을 바탕으로 나만의 로또번호 흐름을 이어가보세요.
+        <p class="text-base md:text-xl text-secondary max-w-2xl mx-auto mb-10 md:mb-12 leading-relaxed break-keep px-4 font-normal opacity-90">
+          최신 회차, 당첨금, 판매점 정보를 확인하고 <br class="hidden sm:block"/>바이오리듬을 바탕으로 나만의 로또번호 흐름을 이어가보세요.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="#biorhythm-card" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-8 py-4 rounded-full text-lg font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform text-center">
+        <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-6 sm:px-0">
+          <a href="#biorhythm-card" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-8 py-3.5 md:py-4 rounded-full text-base md:text-lg font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-center">
             바이오 분석 시작
           </a>
-          <a href="/guide-how-to-use.html" class="bg-surface-container-high text-on-secondary-container px-8 py-4 rounded-full text-lg font-bold hover:bg-surface-container-highest transition-colors text-center">
+          <a href="/guide-how-to-use.html" class="bg-surface-container-high text-on-secondary-container px-8 py-3.5 md:py-4 rounded-full text-base md:text-lg font-bold hover:bg-surface-container-highest active:scale-95 transition-all text-center">
             이용 방법 보기
           </a>
         </div>
@@ -144,100 +171,100 @@
     </section>
 
     <!-- Winner Stats Card -->
-    <section class="max-w-4xl mx-auto px-6 pb-24">
-      <div class="bg-surface-container-lowest p-12 rounded-[2.5rem] text-center shadow-sm border border-outline-variant relative overflow-hidden group">
+    <section class="max-w-4xl mx-auto px-4 md:px-6 pb-20 md:pb-24">
+      <div class="bg-surface-container-lowest p-8 md:p-12 rounded-2xl md:rounded-[2.5rem] text-center shadow-sm border border-outline-variant/30 relative overflow-hidden group">
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/10 via-primary to-primary/10"></div>
-        <p class="text-xs tracking-[0.2em] uppercase text-zinc-500 font-bold mb-4">Latest Winner Statistics</p>
-        <h2 class="text-sm font-bold text-emerald-600 mb-2">직전 회차 1등 예상 실수령액</h2>
-        <div id="latest-net-amount" class="text-4xl md:text-6xl font-extrabold text-primary mb-6 tracking-tighter">
-          데이터를 불러오는 중...
+        <p class="text-[10px] md:text-xs tracking-[0.2em] uppercase text-zinc-400 font-bold mb-4">Latest Winner Statistics</p>
+        <h2 class="text-xs md:text-sm font-bold text-emerald-600 mb-2">직전 회차 1등 예상 실수령액</h2>
+        <div id="latest-net-amount" class="text-3xl sm:text-4xl md:text-6xl font-extrabold text-primary mb-4 md:mb-6 tracking-tighter break-all">
+          데이터 로딩 중...
         </div>
-        <div id="latest-jackpot-meta" class="flex items-center justify-center gap-4 text-zinc-500 text-sm font-light">
-          회차 정보와 세전 당첨금이 여기에 표시됩니다.
+        <div id="latest-jackpot-meta" class="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-zinc-500 text-[11px] md:text-sm font-light">
+          데이터를 불러오고 있습니다.
         </div>
       </div>
     </section>
 
     <!-- Feature Bento Grid -->
-    <section class="max-w-7xl mx-auto px-6 py-24">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <section class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         <!-- Step 1 -->
-        <div class="bg-surface-container-lowest p-10 rounded-3xl group hover:bg-primary transition-all duration-500 shadow-sm border border-zinc-100">
-          <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20">
-            <span class="material-symbols-outlined text-primary text-3xl group-hover:text-white">analytics</span>
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-2xl md:rounded-3xl group hover:bg-primary transition-all duration-500 shadow-sm border border-zinc-100">
+          <div class="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:bg-white/20">
+            <span class="material-symbols-outlined text-primary text-2xl md:text-3xl group-hover:text-white">analytics</span>
           </div>
-          <h3 class="text-2xl font-bold mb-4 group-hover:text-white">리듬 분석</h3>
-          <p class="text-secondary leading-relaxed group-hover:text-white/80">생년월일 입력 후 오늘의 신체, 감성, 지성 리듬을 확인합니다.</p>
+          <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-white">리듬 분석</h3>
+          <p class="text-sm md:text-base text-secondary leading-relaxed group-hover:text-white/80 opacity-90 break-keep">생년월일 입력 후 오늘의 신체, 감성, 지성 리듬을 확인합니다.</p>
         </div>
         <!-- Step 2 -->
-        <div class="bg-surface-container-lowest p-10 rounded-3xl group hover:bg-primary transition-all duration-500 shadow-sm border border-zinc-100">
-          <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20">
-            <span class="material-symbols-outlined text-primary text-3xl group-hover:text-white">refresh</span>
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-2xl md:rounded-3xl group hover:bg-primary transition-all duration-500 shadow-sm border border-zinc-100">
+          <div class="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:bg-white/20">
+            <span class="material-symbols-outlined text-primary text-2xl md:text-3xl group-hover:text-white">refresh</span>
           </div>
-          <h3 class="text-2xl font-bold mb-4 group-hover:text-white">번호 생성</h3>
-          <p class="text-secondary leading-relaxed group-hover:text-white/80">분석된 리듬을 가중치로 사용하여 나만의 번호 조합을 만듭니다.</p>
+          <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-white">번호 생성</h3>
+          <p class="text-sm md:text-base text-secondary leading-relaxed group-hover:text-white/80 opacity-90 break-keep">분석된 리듬을 가중치로 사용하여 나만의 번호 조합을 만듭니다.</p>
         </div>
         <!-- Step 3 -->
-        <div class="bg-surface-container-lowest p-10 rounded-3xl group hover:bg-primary transition-all duration-500 shadow-sm border border-zinc-100">
-          <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20">
-            <span class="material-symbols-outlined text-primary text-3xl group-hover:text-white">search</span>
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-2xl md:rounded-3xl group hover:bg-primary transition-all duration-500 shadow-sm border border-zinc-100">
+          <div class="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center mb-6 md:mb-8 group-hover:bg-white/20">
+            <span class="material-symbols-outlined text-primary text-2xl md:text-3xl group-hover:text-white">search</span>
           </div>
-          <h3 class="text-2xl font-bold mb-4 group-hover:text-white">데이터 조회</h3>
-          <p class="text-secondary leading-relaxed group-hover:text-white/80">최신 회차 당첨 정보와 1등 배출 판매점을 상세히 확인합니다.</p>
+          <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-white">데이터 조회</h3>
+          <p class="text-sm md:text-base text-secondary leading-relaxed group-hover:text-white/80 opacity-90 break-keep">최신 회차 당첨 정보와 1등 배출 판매점을 상세히 확인합니다.</p>
         </div>
       </div>
     </section>
 
     <!-- Bio-rhythm Analysis Input Card -->
-    <section class="max-w-7xl mx-auto px-6 py-24 bg-surface-container-low rounded-xl" id="biorhythm-card">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <section class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24 bg-surface-container-low rounded-xl" id="biorhythm-card">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
         <div class="order-2 lg:order-1">
-          <div class="bg-surface-container-lowest p-8 md:p-12 rounded-3xl shadow-sm">
-            <h2 class="text-3xl font-bold mb-8">오늘의 바이오리듬 분석</h2>
-            <form class="space-y-6" onsubmit="return false;">
+          <div class="bg-surface-container-lowest p-6 md:p-12 rounded-2xl md:rounded-3xl shadow-sm">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-on-surface">오늘의 바이오리듬 분석</h2>
+            <form class="space-y-5 md:space-y-6" onsubmit="return false;">
               <div class="space-y-2">
-                <label class="text-sm font-semibold text-secondary px-1">생년월일 (8자리)</label>
-                <input id="birth-date-simple" class="w-full bg-surface-container-low border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary/40 text-on-surface" type="text" placeholder="예: 19940321" maxlength="8"/>
+                <label class="text-xs md:text-sm font-semibold text-secondary px-1 opacity-80">생년월일 (8자리)</label>
+                <input id="birth-date-simple" class="w-full bg-surface-container-low border-none rounded-xl md:rounded-2xl p-4 focus:ring-2 focus:ring-primary/40 text-on-surface placeholder:text-zinc-400" type="text" placeholder="예: 19940321" maxlength="8"/>
               </div>
               <div class="space-y-2">
-                <label class="text-sm font-semibold text-secondary px-1">연동 강도</label>
-                <div class="flex gap-6 py-2">
-                  <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bio-strength" value="weak" class="text-primary focus:ring-primary"> 약하게</label>
-                  <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bio-strength" value="medium" checked class="text-primary focus:ring-primary"> 중간</label>
-                  <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bio-strength" value="strong" class="text-primary focus:ring-primary"> 강하게</label>
+                <label class="text-xs md:text-sm font-semibold text-secondary px-1 opacity-80">연동 강도</label>
+                <div class="flex gap-4 md:gap-6 py-2">
+                  <label class="flex items-center gap-2 cursor-pointer text-sm md:text-base"><input type="radio" name="bio-strength" value="weak" class="text-primary focus:ring-primary"> 약하게</label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm md:text-base"><input type="radio" name="bio-strength" value="medium" checked class="text-primary focus:ring-primary"> 중간</label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm md:text-base"><input type="radio" name="bio-strength" value="strong" class="text-primary focus:ring-primary"> 강하게</label>
                 </div>
               </div>
-              <button id="calc-bio-btn" class="w-full bg-primary text-on-primary py-5 rounded-2xl font-bold text-lg hover:brightness-110 transition-all flex items-center justify-center gap-3 mt-4">
+              <button id="calc-bio-btn" class="w-full bg-primary text-on-primary py-4 md:py-5 rounded-xl md:rounded-2xl font-bold text-base md:text-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 mt-4 shadow-lg shadow-primary/10">
                 <span class="material-symbols-outlined">bolt</span>
                 리듬 분석하기
               </button>
             </form>
-            <div id="biorhythm-result" class="mt-8 p-6 bg-surface-container-low rounded-2xl min-h-[100px]">
-              <p class="text-zinc-500 text-center">생년월일을 입력하면 분석 결과가 여기에 표시됩니다.</p>
+            <div id="biorhythm-result" class="mt-6 md:mt-8 p-4 md:p-6 bg-surface-container-low rounded-xl md:rounded-2xl min-h-[100px] border border-zinc-100">
+              <p class="text-zinc-500 text-center text-sm md:text-base break-keep">생년월일을 입력하면 분석 결과가 여기에 표시됩니다.</p>
             </div>
           </div>
         </div>
-        <div class="order-1 lg:order-2">
-          <h2 class="text-4xl md:text-5xl font-extrabold mb-8 leading-tight">데이터로 분석하는 <br/><span class="text-primary italic">최적의 컨디션</span></h2>
-          <p class="text-lg text-secondary mb-8 leading-relaxed">
+        <div class="order-1 lg:order-2 px-2">
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-6 md:mb-8 leading-tight text-on-surface">데이터로 분석하는 <br/><span class="text-primary italic">최적의 컨디션</span></h2>
+          <p class="text-base md:text-lg text-secondary mb-8 md:mb-10 leading-relaxed break-keep opacity-90">
             바이오리듬은 우리의 신체적, 감성적, 지성적 상태가 주기적인 흐름을 가진다는 이론입니다. 로또리듬은 이 리듬을 수치화하여 번호 생성의 가중치로 활용합니다.
           </p>
-          <ul class="space-y-4">
-            <li class="flex items-center gap-4 text-secondary font-medium">
-              <span class="w-6 h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary text-sm">check</span>
+          <ul class="space-y-3 md:space-y-4">
+            <li class="flex items-center gap-3 md:gap-4 text-secondary text-sm md:text-base font-medium">
+              <span class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xs md:text-sm">check</span>
               </span>
               신체 리듬 (23일 주기)
             </li>
-            <li class="flex items-center gap-4 text-secondary font-medium">
-              <span class="w-6 h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary text-sm">check</span>
+            <li class="flex items-center gap-3 md:gap-4 text-secondary text-sm md:text-base font-medium">
+              <span class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xs md:text-sm">check</span>
               </span>
               감성 리듬 (28일 주기)
             </li>
-            <li class="flex items-center gap-4 text-secondary font-medium">
-              <span class="w-6 h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary text-sm">check</span>
+            <li class="flex items-center gap-3 md:gap-4 text-secondary text-sm md:text-base font-medium">
+              <span class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary-container/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xs md:text-sm">check</span>
               </span>
               지성 리듬 (33일 주기)
             </li>
@@ -247,41 +274,41 @@
     </section>
 
     <!-- Number Generator Dashboard -->
-    <section class="max-w-7xl mx-auto px-6 py-24" id="generator-card">
-      <div class="rounded-3xl p-8 md:p-16 relative overflow-hidden bg-[#FAFAFA] text-[#0F172A] border border-zinc-100 shadow-sm">
-        <div class="absolute top-0 right-0 p-12 opacity-[0.03] text-slate-900"><span class="material-symbols-outlined text-[15rem] text-primary/5">casino</span></div>
+    <section class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24" id="generator-card">
+      <div class="rounded-2xl md:rounded-3xl p-6 md:p-16 relative overflow-hidden bg-[#FAFAFA] text-[#0F172A] border border-zinc-100 shadow-sm">
+        <div class="absolute top-0 right-0 p-8 md:p-12 opacity-[0.03] text-slate-900 pointer-events-none"><span class="material-symbols-outlined text-[10rem] md:text-[15rem] text-primary/5">casino</span></div>
         <div class="relative z-10">
           <div class="max-w-2xl">
-            <h2 class="text-4xl font-bold mb-6">리듬 연동 번호 생성기</h2>
-            <p class="text-lg mb-10 text-zinc-600">분석된 리듬을 참고 가중치로 반영해 6개 번호 조합을 생성합니다. 먼저 위 단계에서 바이오리듬을 분석해 주세요.</p>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6">리듬 연동 번호 생성기</h2>
+            <p class="text-base md:text-lg mb-8 md:mb-10 text-zinc-600 break-keep opacity-90">분석된 리듬을 참고 가중치로 반영해 6개 번호 조합을 생성합니다. 먼저 위 단계에서 바이오리듬을 분석해 주세요.</p>
           </div>
-          <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
-            <div class="p-6 rounded-2xl border bg-white border-zinc-200">
-              <span class="block text-zinc-500 text-xs uppercase tracking-widest font-bold mb-2">생성 세트 수</span>
-              <select id="set-count" class="w-full border-none p-0 text-xl font-semibold focus:ring-0">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
+            <div class="p-4 md:p-6 rounded-xl md:rounded-2xl border bg-white border-zinc-200">
+              <span class="block text-zinc-500 text-[10px] md:text-xs uppercase tracking-widest font-bold mb-2 opacity-70">생성 세트 수</span>
+              <select id="set-count" class="w-full border-none p-0 text-lg md:text-xl font-semibold focus:ring-0 bg-transparent">
                 <option value="1">1세트</option>
                 <option value="3" selected>3세트</option>
                 <option value="5">5세트</option>
                 <option value="10">10세트</option>
               </select>
             </div>
-            <div class="p-6 rounded-2xl border bg-white border-zinc-200 lg:col-span-2">
-              <span class="block text-zinc-500 text-xs uppercase tracking-widest font-bold mb-2">상태 메시지</span>
-              <span id="generator-message" class="text-lg font-medium text-emerald-600">준비 완료</span>
+            <div class="p-4 md:p-6 rounded-xl md:rounded-2xl border bg-white border-zinc-200 lg:col-span-2">
+              <span class="block text-zinc-500 text-[10px] md:text-xs uppercase tracking-widest font-bold mb-2 opacity-70">상태 메시지</span>
+              <span id="generator-message" class="text-base md:text-lg font-medium text-emerald-600 break-keep">준비 완료</span>
             </div>
             <div class="flex gap-2">
-              <button id="generate-btn" class="flex-1 bg-primary hover:bg-primary-container text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-                <span class="material-symbols-outlined">auto_awesome</span>
+              <button id="generate-btn" class="flex-1 bg-primary hover:bg-primary-container text-white rounded-xl md:rounded-2xl font-bold text-base md:text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95">
+                <span class="material-symbols-outlined text-xl md:text-2xl">auto_awesome</span>
                 생성하기
               </button>
-              <button id="reset-options-btn" class="p-4 bg-zinc-100 text-zinc-500 rounded-2xl hover:bg-zinc-200 transition-colors">
+              <button id="reset-options-btn" class="p-4 bg-zinc-100 text-zinc-500 rounded-xl md:rounded-2xl hover:bg-zinc-200 transition-colors active:scale-95">
                 <span class="material-symbols-outlined">restart_alt</span>
               </button>
             </div>
           </div>
           
           <!-- Number Grid Representation -->
-          <ul id="generated-list" class="space-y-4">
+          <ul id="generated-list" class="space-y-3 md:space-y-4">
             <!-- JS will inject number-set li here -->
           </ul>
         </div>
@@ -289,42 +316,42 @@
     </section>
 
     <!-- Result Lookup Section -->
-    <section class="max-w-7xl mx-auto px-6 py-24 border-t border-zinc-100">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div class="lg:col-span-5">
-          <h2 class="text-4xl font-bold mb-6">데이터 조회</h2>
-          <p class="text-lg text-secondary mb-8">회차별 당첨번호와 1등 배출 판매점 정보를 빠르게 조회할 수 있습니다.</p>
+    <section class="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24 border-t border-zinc-100">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12">
+        <div class="lg:col-span-5 px-2">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-on-surface">데이터 조회</h2>
+          <p class="text-base md:text-lg text-secondary mb-8 md:mb-10 break-keep opacity-90 font-light">회차별 당첨번호와 1등 배출 판매점 정보를 빠르게 조회할 수 있습니다.</p>
           <div class="space-y-6">
-            <div class="bg-surface-container-lowest p-8 rounded-3xl border border-zinc-100 shadow-sm" id="draw-card">
-              <h3 class="text-xl font-bold text-primary mb-6 flex items-center gap-3">
+            <div class="bg-surface-container-lowest p-6 md:p-8 rounded-2xl md:rounded-3xl border border-zinc-100 shadow-sm" id="draw-card">
+              <h3 class="text-lg md:text-xl font-bold text-primary mb-6 flex items-center gap-3">
                 <span class="material-symbols-outlined">history</span>
                 지난 회차 당첨번호
               </h3>
-              <div class="flex gap-3 mb-6">
-                <input id="draw-no" type="number" placeholder="회차 입력" class="flex-1 bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none"/>
-                <button id="check-draw-btn" class="bg-primary text-on-primary px-6 rounded-xl font-bold hover:opacity-90 transition-all">조회</button>
+              <div class="flex gap-2 md:gap-3 mb-6">
+                <input id="draw-no" type="number" placeholder="회차 입력" class="flex-1 bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none text-sm md:text-base"/>
+                <button id="check-draw-btn" class="bg-primary text-on-primary px-4 md:px-6 rounded-xl font-bold hover:opacity-90 transition-all text-sm md:text-base">조회</button>
               </div>
-              <button id="load-latest-btn" class="w-full py-3 text-sm font-semibold text-zinc-500 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors mb-4">최신 회차 불러오기</button>
-              <div id="draw-result" class="p-4 bg-zinc-50 rounded-xl min-h-[100px] text-sm text-zinc-500">
+              <button id="load-latest-btn" class="w-full py-3 text-xs md:text-sm font-semibold text-zinc-500 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors mb-4">최신 회차 불러오기</button>
+              <div id="draw-result" class="p-4 bg-zinc-50 rounded-xl min-h-[100px] text-xs md:text-sm text-zinc-500 break-keep leading-relaxed">
                 회차를 조회해 주세요.
               </div>
             </div>
           </div>
         </div>
         <div class="lg:col-span-7">
-          <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-zinc-100" id="store-card">
-            <div class="p-8 bg-zinc-50 border-b border-zinc-100 flex justify-between items-center">
-              <span class="font-bold text-xl flex items-center gap-2">
+          <div class="bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-zinc-100" id="store-card">
+            <div class="p-6 md:p-8 bg-zinc-50 border-b border-zinc-100 flex justify-between items-center">
+              <span class="font-bold text-lg md:text-xl flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">store</span>
                 1등 당첨판매점 조회
               </span>
             </div>
-            <div class="p-8">
-              <div class="flex gap-3 mb-8">
-                <input id="store-draw-no" type="number" placeholder="회차 입력" class="flex-1 bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none"/>
-                <button id="store-search-btn" class="bg-primary text-on-primary px-8 rounded-xl font-bold hover:opacity-90 transition-all">조회</button>
+            <div class="p-6 md:p-8">
+              <div class="flex gap-2 md:gap-3 mb-8">
+                <input id="store-draw-no" type="number" placeholder="회차 입력" class="flex-1 bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 outline-none text-sm md:text-base"/>
+                <button id="store-search-btn" class="bg-primary text-on-primary px-6 md:px-8 rounded-xl font-bold hover:opacity-90 transition-all text-sm md:text-base">조회</button>
               </div>
-              <div id="store-result" class="min-h-[200px] text-zinc-500">
+              <div id="store-result" class="min-h-[200px] text-zinc-500 text-sm md:text-base break-keep leading-relaxed">
                 조회 결과가 여기에 표시됩니다.
               </div>
             </div>
@@ -334,33 +361,33 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="max-w-4xl mx-auto px-6 py-24">
-      <h2 class="text-4xl font-bold mb-12 text-center">자주 묻는 질문</h2>
-      <div class="space-y-4">
-        <details class="group bg-white rounded-2xl border border-zinc-100 open:shadow-md transition-all duration-300">
-          <summary class="list-none p-6 flex justify-between items-center cursor-pointer">
-            <span class="font-bold text-lg">바이오리듬 번호는 당첨 확률을 높여주나요?</span>
-            <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+    <section class="max-w-4xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      <h2 class="text-3xl md:text-4xl font-bold mb-10 md:mb-12 text-center text-on-surface">자주 묻는 질문</h2>
+      <div class="space-y-3 md:space-y-4">
+        <details class="group bg-white rounded-xl md:rounded-2xl border border-zinc-100 open:shadow-md transition-all duration-300">
+          <summary class="list-none p-5 md:p-6 flex justify-between items-center cursor-pointer">
+            <span class="font-bold text-base md:text-lg break-keep pr-4 text-on-surface">바이오리듬 번호는 당첨 확률을 높여주나요?</span>
+            <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-zinc-400">expand_more</span>
           </summary>
-          <div class="px-6 pb-6 text-secondary leading-relaxed">
+          <div class="px-5 md:px-6 pb-5 md:pb-6 text-sm md:text-base text-secondary leading-relaxed break-keep opacity-90">
             아닙니다. 참고와 해석을 위한 기능이며 결과를 보장하지 않습니다. 로또는 무작위 추첨 게임입니다.
           </div>
         </details>
-        <details class="group bg-white rounded-2xl border border-zinc-100 open:shadow-md transition-all duration-300">
-          <summary class="list-none p-6 flex justify-between items-center cursor-pointer">
-            <span class="font-bold text-lg">오늘 기준 데이터는 어떻게 확인하나요?</span>
-            <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+        <details class="group bg-white rounded-xl md:rounded-2xl border border-zinc-100 open:shadow-md transition-all duration-300">
+          <summary class="list-none p-5 md:p-6 flex justify-between items-center cursor-pointer">
+            <span class="font-bold text-base md:text-lg break-keep pr-4 text-on-surface">오늘 기준 데이터는 어떻게 확인하나요?</span>
+            <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-zinc-400">expand_more</span>
           </summary>
-          <div class="px-6 pb-6 text-secondary leading-relaxed">
+          <div class="px-5 md:px-6 pb-5 md:pb-6 text-sm md:text-base text-secondary leading-relaxed break-keep opacity-90">
             상단 실수령액 카드와 최신 회차 불러오기 기능으로 바로 확인할 수 있습니다. 데이터는 공식 발표 직후 업데이트됩니다.
           </div>
         </details>
-        <details class="group bg-white rounded-2xl border border-zinc-100 open:shadow-md transition-all duration-300">
-          <summary class="list-none p-6 flex justify-between items-center cursor-pointer">
-            <span class="font-bold text-lg">번호 생성 결과는 매번 달라지나요?</span>
-            <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+        <details class="group bg-white rounded-xl md:rounded-2xl border border-zinc-100 open:shadow-md transition-all duration-300">
+          <summary class="list-none p-5 md:p-6 flex justify-between items-center cursor-pointer">
+            <span class="font-bold text-base md:text-lg break-keep pr-4 text-on-surface">번호 생성 결과는 매번 달라지나요?</span>
+            <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-zinc-400">expand_more</span>
           </summary>
-          <div class="px-6 pb-6 text-secondary leading-relaxed">
+          <div class="px-5 md:px-6 pb-5 md:pb-6 text-sm md:text-base text-secondary leading-relaxed break-keep opacity-90">
             그럴 수 있습니다. 입력된 바이오리듬 수치 외에도 알고리즘 내 무작위성이 함께 반영되기 때문입니다.
           </div>
         </details>
@@ -370,31 +397,31 @@
 
   <!-- Detailed Footer -->
   <footer class="w-full border-t border-zinc-200/30 bg-zinc-50">
-    <div class="max-w-7xl mx-auto py-16 px-6 grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
-      <div class="space-y-6">
+    <div class="max-w-7xl mx-auto py-12 md:py-16 px-6 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 text-center md:text-left">
+      <div class="space-y-4 md:space-y-6">
         <div class="text-lg font-bold font-headline text-zinc-900">로또리듬</div>
-        <p class="text-sm leading-relaxed text-zinc-500">
+        <p class="text-sm leading-relaxed text-zinc-500 break-keep">
           로또 데이터를 설명과 함께 제공하는 정적 정보 사이트입니다. 당신의 일상에 작은 즐거움을 더합니다.
         </p>
       </div>
-      <div class="space-y-6">
-        <h4 class="font-bold text-sm uppercase tracking-widest text-zinc-400">Navigation</h4>
-        <ul class="space-y-4">
-          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block" href="/guides.html">로또 데이터 가이드</a></li>
-          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block" href="/faq.html">FAQ</a></li>
-          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block" href="/about.html">사이트 소개</a></li>
+      <div class="space-y-4 md:space-y-6">
+        <h4 class="font-bold text-sm uppercase tracking-widest text-zinc-400 opacity-80">Navigation</h4>
+        <ul class="space-y-3 md:space-y-4">
+          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block text-sm" href="/guides.html">로또 데이터 가이드</a></li>
+          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block text-sm" href="/faq.html">FAQ</a></li>
+          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block text-sm" href="/about.html">사이트 소개</a></li>
         </ul>
       </div>
-      <div class="space-y-6">
-        <h4 class="font-bold text-sm uppercase tracking-widest text-zinc-400">Legal</h4>
-        <ul class="space-y-4">
-          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block" href="/privacy.html">개인정보처리방침</a></li>
-          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block" href="/terms.html">이용약관</a></li>
+      <div class="space-y-4 md:space-y-6">
+        <h4 class="font-bold text-sm uppercase tracking-widest text-zinc-400 opacity-80">Legal</h4>
+        <ul class="space-y-3 md:space-y-4">
+          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block text-sm" href="/privacy.html">개인정보처리방침</a></li>
+          <li><a class="text-zinc-500 hover:text-emerald-500 hover:translate-x-1 transition-all block text-sm" href="/terms.html">이용약관</a></li>
         </ul>
       </div>
     </div>
     <div class="max-w-7xl mx-auto px-6 py-8 border-t border-zinc-200/30 text-center md:text-left">
-      <p class="text-sm leading-relaxed text-zinc-500">
+      <p class="text-xs md:text-sm leading-relaxed text-zinc-400 font-light">
         © 2024 Lotto Data Project. Precision analytics for the modern enthusiast.
       </p>
     </div>
