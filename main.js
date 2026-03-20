@@ -1,3 +1,4 @@
+const siteLogo = document.querySelector("#site-logo");
 const generatedList = document.querySelector("#generated-list");
 const setCountSelect = document.querySelector("#set-count");
 const generatorMessage = document.querySelector("#generator-message");
@@ -36,18 +37,15 @@ let historicalDraws = [];
 let isSyncing = false;
 
 const DEFAULT_BIORHYTHM_HTML = `
-  <p class="result-title">분석 전 안내</p>
-  <p>생년월일을 입력하면 오늘의 바이오리듬 그래프와 종합 리듬 수치가 여기에 표시됩니다. 분석 결과는 개인화된 해석용 정보이며, 이어지는 번호 생성 단계에서 참고용으로만 반영됩니다.</p>
+  <p class="text-zinc-500 text-center text-sm md:text-base break-keep">생년월일을 입력하면 분석 결과가 여기에 표시됩니다.</p>
 `;
 
 const DEFAULT_DRAW_HTML = `
-  <p class="result-title">조회 전 안내</p>
-  <p>회차를 입력하면 결과가 여기에 표시됩니다. 당첨번호와 보너스번호는 번호색으로 구분되어 보이고, 1등 당첨금과 당첨자 수까지 함께 확인할 수 있습니다.</p>
+  회차를 조회해 주세요.
 `;
 
 const DEFAULT_STORE_HTML = `
-  <p class="result-title">조회 전 안내</p>
-  <p>조회 결과에는 해당 회차에서 1등이 나온 판매점 목록이 표시됩니다. 자동, 수동, 반자동 여부와 상호명, 주소가 정리되어 나타납니다.</p>
+  조회 결과가 여기에 표시됩니다.
 `;
 
 function ballColor(number) {
@@ -109,7 +107,7 @@ function drawBiorhythmChart(canvas, days) {
   });
   ctx.fillStyle = "rgba(79, 70, 229, 0.05)";
   ctx.fillRect(w / 2 - 20, paddingY, 40, chartH);
-  ctx.strokeStyle = "#4f46e5"; ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = "#006c49"; ctx.setLineDash([4, 4]);
   ctx.beginPath(); ctx.moveTo(w / 2, paddingY); ctx.lineTo(w / 2, h - paddingY); ctx.stroke();
   ctx.setLineDash([]);
   const drawWave = (period, color) => {
@@ -134,19 +132,19 @@ function handleCalculateBiorhythm() {
     
     biorhythmResult.innerHTML = `
       <div class="bio-chart-container">
-        <p style="text-align:center; font-weight:800; margin-bottom:15px; color:var(--brand);">오늘의 리듬 하모니 (종합 ${result.overall}%)</p>
+        <p style="text-align:center; font-weight:800; margin-bottom:15px; color:#006c49;">오늘의 리듬 하모니 (종합 ${result.overall}%)</p>
         <canvas id="bio-canvas" width="800" height="300" style="width:100%; height:auto;"></canvas>
         <div class="bio-legend" style="display:flex; justify-content:center; gap:15px; margin-top:15px; font-size:0.85rem; font-weight:700;">
-          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#f59e0b; display:inline-block;"></span> 신체 리듬</div>
-          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#ef4444; display:inline-block;"></span> 감성 리듬</div>
-          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#3b82f6; display:inline-block;"></span> 지성 리듬</div>
+          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#f59e0b; display:inline-block;"></span> 신체</div>
+          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#ef4444; display:inline-block;"></span> 감성</div>
+          <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:12px; border-radius:50%; background:#3b82f6; display:inline-block;"></span> 지성</div>
         </div>
       </div>
     `;
     drawBiorhythmChart(document.querySelector("#bio-canvas"), result.days);
     generatorMessage.textContent = "리듬 분석이 완료되었습니다. 참고용 번호 조합을 생성해 보세요.";
   } catch (error) {
-    biorhythmResult.innerHTML = `<p class="result-title">입력 확인</p><p>${error.message}</p>`;
+    biorhythmResult.innerHTML = `<p class="text-red-500 text-center">${error.message}</p>`;
   }
 }
 
@@ -171,10 +169,10 @@ async function renderGeneratedSets() {
       const rankText = Number.isFinite(item.rankPercentile) ? ` (시뮬레이션 상위 ${item.rankPercentile}%)` : "";
       
       const li = document.createElement("li"); li.className = "number-set";
-      const label = document.createElement("span"); label.style.fontWeight = "800"; label.style.marginRight = "1rem"; label.textContent = `${i + 1}SET`;
+      const label = document.createElement("span"); label.textContent = `${i + 1}SET`;
       li.appendChild(label);
       item.numbers.forEach(n => li.appendChild(createBall(n)));
-      const badge = document.createElement("span"); badge.className = "badge"; badge.style.marginLeft = "auto"; badge.style.background = "var(--brand-2)";
+      const badge = document.createElement("span"); badge.className = "badge";
       badge.textContent = `리듬 점수 ${item.score}점${rankText}`;
       li.appendChild(badge);
       generatedList.appendChild(li);
@@ -192,62 +190,36 @@ async function requestJson(url) {
 
 async function handleCheckDraw() {
   const drawNo = drawInput.value; if (!drawNo) return;
-  drawResult.innerHTML = `<p class="result-title">조회 중</p><p>선택한 회차의 당첨번호와 당첨금 정보를 불러오고 있습니다.</p>`;
+  drawResult.innerHTML = `조회 중...`;
   try {
     const body = await requestJson(`${API_DRAW}?drawNo=${drawNo}`);
     const d = body.data;
-    drawResult.innerHTML = `<strong>${d.drwNo}회 (${d.drwNoDate})</strong><br><div class="number-set" style="border:none; background:none; padding:10px 0; justify-content:center;"></div><p style="margin-top:10px; font-size:0.9rem;">1등 당첨금: ${Number(d.firstWinamnt).toLocaleString()}원 (${d.firstPrzwnerCo}명)</p>`;
+    drawResult.innerHTML = `<div class="font-bold mb-2">${d.drwNo}회 (${d.drwNoDate})</div><div class="number-set" style="border:none; background:none; padding:10px 0; justify-content:center;"></div><p class="mt-2 text-primary font-bold">1등 당첨금: ${Number(d.firstWinamnt).toLocaleString()}원 (${d.firstPrzwnerCo}명)</p>`;
     const target = drawResult.querySelector(".number-set");
     [d.drwtNo1, d.drwtNo2, d.drwtNo3, d.drwtNo4, d.drwtNo5, d.drwtNo6].forEach(n => target.appendChild(createBall(n)));
-    const bLabel = document.createElement("span"); bLabel.textContent = "+"; bLabel.style.margin = "0 5px"; target.appendChild(bLabel);
+    const bLabel = document.createElement("span"); bLabel.textContent = "+"; bLabel.style.margin = "0 5px"; bLabel.style.fontWeight = "800"; target.appendChild(bLabel);
     target.appendChild(createBall(d.bnusNo));
   } catch (e) {
-    drawResult.innerHTML = `<p class="result-title">조회 실패</p><p>${e.message || "회차 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."}</p><p>회차 번호를 다시 확인하거나 최신 회차 불러오기 버튼으로 다시 시도해 보세요.</p>`;
+    drawResult.innerHTML = `<p class="text-red-500">${e.message || "오류가 발생했습니다."}</p>`;
   }
 }
 
 async function handleStoreSearch() {
   const drawNo = storeInput.value; if (!drawNo) return;
-  storeResult.innerHTML = `<p class="result-title">조회 중</p><p>선택한 회차의 1등 판매점 목록을 불러오고 있습니다.</p>`;
+  storeResult.innerHTML = `조회 중...`;
   try {
     const body = await requestJson(`${API_STORES}?drawNo=${drawNo}`);
     if (body.stores) {
-      storeResult.innerHTML = `<strong>${drawNo}회 1등 배출점</strong><ul style="margin-top:10px; font-size:0.85rem; text-align:left; padding-left:20px;"></ul>`;
+      storeResult.innerHTML = `<div class="font-bold mb-4">${drawNo}회 1등 배출점</div><ul class="space-y-2 text-sm text-left"></ul>`;
       body.stores.forEach(s => {
-        const li = document.createElement("li"); li.textContent = `[${s.method}] ${s.name} (${s.address})`;
+        const li = document.createElement("li"); li.className = "p-3 bg-zinc-50 rounded-lg border border-zinc-100";
+        li.textContent = `[${s.method}] ${s.name} (${s.address})`;
         storeResult.querySelector("ul").appendChild(li);
       });
     }
   } catch (e) {
-    storeResult.innerHTML = `<p class="result-title">조회 실패</p><p>${e.message || "판매점 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."}</p><p>회차 번호를 다시 확인한 뒤 판매점 조회를 다시 실행해 보세요.</p>`;
+    storeResult.innerHTML = `<p class="text-red-500">${e.message || "오류가 발생했습니다."}</p>`;
   }
-}
-
-async function syncHistoricalData(latestNo) {
-  if (isSyncing) return;
-  isSyncing = true;
-  const savedData = localStorage.getItem("lotto_history");
-  let draws = savedData ? JSON.parse(savedData) : [];
-  const startNo = draws.length > 0 ? draws[draws.length - 1].drwNo + 1 : 1;
-  if (startNo > latestNo) {
-    historicalDraws = draws;
-    isSyncing = false;
-    return;
-  }
-  for (let i = startNo; i <= latestNo; i++) {
-    try {
-      const body = await requestJson(`${API_DRAW}?drawNo=${i}`);
-      if (body.ok) {
-        const d = body.data;
-        draws.push({ drwNo: d.drwNo, numbers: [d.drwtNo1, d.drwtNo2, d.drwtNo3, d.drwtNo4, d.drwtNo5, d.drwtNo6] });
-        if (i % 50 === 0) localStorage.setItem("lotto_history", JSON.stringify(draws));
-      }
-      if (i % 10 === 0) await new Promise(r => setTimeout(r, 100));
-    } catch (e) { break; }
-  }
-  localStorage.setItem("lotto_history", JSON.stringify(draws));
-  historicalDraws = draws;
-  isSyncing = false;
 }
 
 async function initLatestData() {
@@ -256,23 +228,37 @@ async function initLatestData() {
     const d = body.data;
     const net = calculateTakeHomeAmount(d.firstWinamnt);
     latestNetAmount.textContent = `${net.toLocaleString()}원`;
-    latestJackpotMeta.textContent = `${d.drwNo}회 (${d.drwNoDate}) · 세전 ${Number(d.firstWinamnt).toLocaleString()}원`;
+    latestJackpotMeta.innerHTML = `<span>${d.drwNo}회</span><span class="opacity-30">|</span><span>${d.drwNoDate}</span><span class="opacity-30">|</span><span>세전 ${Number(d.firstWinamnt).toLocaleString()}원</span>`;
     drawInput.value = d.drwNo;
     storeInput.value = d.drwNo;
-    syncHistoricalData(d.drwNo);
   } catch (e) {
-    latestNetAmount.textContent = "최신 회차 연결 지연";
-    latestJackpotMeta.textContent = "잠시 후 다시 시도하면 최신 실수령액 정보를 불러올 수 있습니다.";
+    latestNetAmount.textContent = "연결 지연";
   }
+}
+
+function resetAll() {
+  currentRhythm = null;
+  birthDateInput.value = "";
+  setCountSelect.value = "3";
+  generatedList.innerHTML = "";
+  generatorMessage.textContent = "준비 완료";
+  biorhythmResult.innerHTML = DEFAULT_BIORHYTHM_HTML;
+  drawResult.innerHTML = DEFAULT_DRAW_HTML;
+  storeResult.innerHTML = DEFAULT_STORE_HTML;
+  initLatestData();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+if (siteLogo) {
+  siteLogo.addEventListener("click", (e) => {
+    e.preventDefault();
+    resetAll();
+  });
 }
 
 calcBioBtn.addEventListener("click", handleCalculateBiorhythm);
 generateBtn.addEventListener("click", renderGeneratedSets);
-resetOptionsBtn.addEventListener("click", () => {
-  currentRhythm = null; generatedList.innerHTML = "";
-  generatorMessage.textContent = "먼저 위 단계에서 바이오리듬을 분석하면 해당 결과가 참고용 가중치로 연결됩니다.";
-  biorhythmResult.innerHTML = DEFAULT_BIORHYTHM_HTML;
-});
+resetOptionsBtn.addEventListener("click", resetAll);
 loadLatestBtn.addEventListener("click", async () => { await initLatestData(); handleCheckDraw(); });
 checkDrawBtn.addEventListener("click", handleCheckDraw);
 storeSearchBtn.addEventListener("click", handleStoreSearch);
