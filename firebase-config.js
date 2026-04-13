@@ -26,13 +26,13 @@
 // =====================================================================
 
 const FIREBASE_CONFIG = {
-  apiKey: "FILL_IN_YOUR_API_KEY",
-  authDomain: "FILL_IN_YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "FILL_IN_YOUR_PROJECT_ID",
-  storageBucket: "FILL_IN_YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "FILL_IN_YOUR_SENDER_ID",
-  appId: "FILL_IN_YOUR_APP_ID"
+  apiKey: "AIzaSyBWzbR40CXglxyH8AfaiyqDPMa2Uv75gnQ",
+  authDomain: "toto1-f8202.firebaseapp.com",
+  projectId: "toto1-f8202",
+  storageBucket: "toto1-f8202.firebasestorage.app",
+  messagingSenderId: "635220408683",
+  appId: "1:635220408683:web:64122125125817bce4342e"
 };
 
 // 관리자 구글 계정 이메일 (admin 페이지 접근 허용)
-const ADMIN_EMAIL = "FILL_IN_YOUR_GOOGLE_EMAIL@gmail.com";
+const ADMIN_EMAIL = "suf40mil0ne@gmail.com";
