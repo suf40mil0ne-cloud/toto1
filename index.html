@@ -442,10 +442,11 @@
         }
         window.saveGeneratedNumbers = async function (numberSets, targetDrawNo) {
           try {
+            // Firestore는 중첩 배열 미지원 → 각 세트를 "1,2,3,4,5,6" 문자열로 저장
             await _db.collection('generatedNumbers').add({
               sessionId: sessionStorage.getItem('_lrSid'),
               targetDrawNo: targetDrawNo,
-              numbers: numberSets,
+              numbers: numberSets.map(nums => nums.join(',')),
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             console.log('[로또리듬] 번호 저장 완료 →', targetDrawNo, '회');

@@ -131,7 +131,8 @@ function renderStats(grouped, winningMap) {
     const winning = winningMap[drawNo];
     if (!winning) return;
     grouped[drawNo].forEach(entry => {
-      (entry.numbers || []).forEach(nums => {
+      (entry.numbers || []).forEach(raw => {
+        const nums = typeof raw === 'string' ? raw.split(',').map(Number) : raw;
         const prize = calcPrize(nums, winning.numbers, winning.bonusNo);
         if (prize.rank >= 1 && prize.rank <= 5) rankedSets++;
       });
@@ -226,7 +227,9 @@ function entryHTML(entry, winning) {
     : '시간 정보 없음';
   const shortId = (entry.sessionId || 'unknown').slice(0, 8);
 
-  const setsHTML = (entry.numbers || []).map((nums, idx) => {
+  const setsHTML = (entry.numbers || []).map((raw, idx) => {
+    // 저장 형식: "1,2,3,4,5,6" 문자열 → 숫자 배열로 파싱
+    const nums = typeof raw === 'string' ? raw.split(',').map(Number) : raw;
     const ballsHTML = nums.map(n => `<span class="ball" style="background:${ballColor(n)}">${n}</span>`).join('');
 
     let prizeBadge = '';
