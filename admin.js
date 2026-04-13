@@ -83,10 +83,10 @@ function showLoginError(msg) {
 // ─── 데이터 로드 ──────────────────────────────────────────────────────
 
 async function loadData() {
+  const loadingEl = document.getElementById('loading');
   try {
-    // 생성된 번호 불러오기 (최신순)
+    // 생성된 번호 불러오기 (복합 인덱스 불필요하도록 단일 정렬 후 클라이언트 정렬)
     const genSnap = await _db.collection('generatedNumbers')
-      .orderBy('targetDrawNo', 'desc')
       .orderBy('createdAt', 'desc')
       .get();
 
@@ -99,7 +99,7 @@ async function loadData() {
     const grouped = {};
     genSnap.forEach(doc => {
       const data = { id: doc.id, ...doc.data() };
-      const key = String(data.targetDrawNo || 0);
+      const key = String(data.targetDrawNo || '미지정');
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(data);
     });
@@ -107,8 +107,14 @@ async function loadData() {
     renderStats(grouped, winningMap);
     renderDraws(grouped, winningMap);
   } catch (e) {
-    document.getElementById('loading').innerHTML =
-      `<p class="text-red-500">데이터 로딩 실패: ${e.message}</p>`;
+    console.error('[Admin] 데이터 로딩 실패:', e);
+    loadingEl.innerHTML = `
+      <div class="text-center py-8">
+        <p class="text-red-500 font-semibold mb-2">데이터 로딩 실패</p>
+        <p class="text-sm text-gray-500 mb-4">${e.message}</p>
+        ${e.message.includes('index') ? `<p class="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg">Firestore 복합 인덱스가 필요합니다.<br>콘솔 로그의 링크를 클릭해 인덱스를 생성해주세요.</p>` : ''}
+        ${e.message.includes('permission') || e.message.includes('PERMISSION') ? `<p class="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg">Firestore 보안 규칙을 설정해주세요.</p>` : ''}
+      </div>`;
   }
 }
 
