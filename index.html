@@ -449,9 +449,7 @@
               numbers: numberSets.map(nums => nums.join(',')),
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            console.log('[로또리듬] 번호 저장 완료 →', targetDrawNo, '회');
-          } catch (e) {
-            console.warn('[로또리듬] 번호 저장 실패:', e.message);
+          } catch (_) {
           }
         };
       } catch (_) { /* silent */ }
