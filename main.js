@@ -178,6 +178,12 @@ async function renderGeneratedSets() {
       generatedList.appendChild(li);
     });
     generatorMessage.textContent = "리듬 결과를 반영한 참고용 번호 조합을 불러왔습니다.";
+
+    // Firebase에 생성된 번호 저장 (설정된 경우)
+    if (typeof window.saveGeneratedNumbers === 'function') {
+      const refDrawNo = Number(drawInput.value) || 0;
+      if (refDrawNo > 0) window.saveGeneratedNumbers(body.data.map(i => i.numbers), refDrawNo + 1);
+    }
   } catch (e) { generatorMessage.textContent = "생성 오류: " + e.message; }
 }
 
